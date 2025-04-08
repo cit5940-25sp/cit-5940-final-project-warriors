@@ -14,3 +14,7 @@ This is an example of a project directory for you to start working from. Please 
 |--- test
     |----- *Test.java (unit test files)
 ```
+
+# Class Diagram
+
+![Final Project Class Diagram drawio](https://github.com/user-attachments/assets/768bb88e-0983-411a-a37d-b9dcb2760295)
