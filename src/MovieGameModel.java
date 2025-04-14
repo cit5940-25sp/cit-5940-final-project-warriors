@@ -1,2 +1,2 @@
-public class MovieGameModel {
+public class MovieGameModel implements IObservable {
 }
