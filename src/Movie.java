@@ -91,4 +91,9 @@ public class Movie {
         this.composers = composers;
     }
 
+    @Override
+    public String toString() {
+        return title + ", " + releaseDate + ", " + genres;
+    }
+
 }
