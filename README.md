@@ -14,3 +14,14 @@ This is an example of a project directory for you to start working from. Please 
 |--- test
     |----- *Test.java (unit test files)
 ```
+
+
+# Class Diagram
+
+![Final Project Class Diagram drawio](https://github.com/user-attachments/assets/768bb88e-0983-411a-a37d-b9dcb2760295)
+
+# Group Workflow
+- Create issue, assign to member, and add to "Backlog".
+- Move issue to "Inprogress" when we start working on it.
+- After it is tentatively complete, move it to "In Review".
+- Group members can review it and then move it to "Done". 
