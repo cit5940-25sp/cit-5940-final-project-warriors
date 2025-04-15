@@ -7,5 +7,13 @@ public interface IObservable {
     public void removeObserver(IObserver observer);
 
     // notify observers that there is an update
-    public void notifyObservers();
+    public void notifyObservers(String event);
+
+    public void removeAllObservers();
+
+    public void setChanged();
+
+    public void clearChanged();
+
+    public boolean hasChanged();
 }

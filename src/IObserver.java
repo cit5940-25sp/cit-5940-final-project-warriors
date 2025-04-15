@@ -3,6 +3,6 @@ import java.util.Observable;
 public interface IObserver {
 
 
-    public void update(Observable o, Object arg);
+    public void update(String event);
 
 }

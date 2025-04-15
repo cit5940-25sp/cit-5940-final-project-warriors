@@ -7,7 +7,7 @@ public class MovieGameView implements IObserver {
 
 
     @Override
-    public void update(Observable o, Object arg) {
+    public void update(String event) {
         //Movie movie = (Movie) arg;
     }
 

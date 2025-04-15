@@ -4,6 +4,7 @@ public class MovieGameModel implements IObservable {
 
     private GameState gameState;
     private List<IObserver> observers;
+    private boolean hasChanged = false;
 
     public MovieGameModel() {
         this.gameState = new GameState();
@@ -26,8 +27,35 @@ public class MovieGameModel implements IObservable {
     }
 
     @Override
-    public void notifyObservers() {
+    public void removeAllObservers() {
+        observers.clear();
+    }
 
+    @Override
+    public void setChanged() {
+        hasChanged = true;
+    }
+
+    @Override
+    public void clearChanged() {
+        hasChanged = false;
+    }
+
+    @Override
+    public boolean hasChanged() {
+        return hasChanged;
+    }
+
+    @Override
+    public void notifyObservers(String event) {
+        if (hasChanged) {
+            List<IObserver> copy = new ArrayList<>(observers);
+            clearChanged();
+
+            for (IObserver observer : copy) {
+                observer.update(event);
+            }
+        }
     }
 
 }
