@@ -1,19 +1,37 @@
 public interface IObservable {
 
-    // adds an observer
+    /**
+     * Adds a new observer
+     */
     public void addObserver(IObserver observer);
 
-    // removes an observer
+    /**
+     * Removes an observer
+     */
     public void removeObserver(IObserver observer);
 
-    // notify observers that there is an update
+    /**
+     * Updates observers if there has been a change
+     */
     public void notifyObservers(String event);
 
+    /**
+     * Clears all observers
+     */
     public void removeAllObservers();
 
+    /**
+     * Update observer status
+     */
     public void setChanged();
 
+    /**
+     * Reset an observer
+     */
     public void clearChanged();
 
+    /**
+     * @return if an observer has been updated
+     */
     public boolean hasChanged();
 }
