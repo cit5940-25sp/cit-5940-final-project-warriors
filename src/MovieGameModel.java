@@ -4,7 +4,8 @@ public class MovieGameModel implements IObservable {
 
     private GameState gameState;
     private List<IObserver> observers;
-    private boolean hasChanged = false;
+    private boolean hasChanged;
+    private Map<String, Integer> connectionsUsed;
 
     /**
      * Initialize a new MovieGameModel
@@ -12,6 +13,8 @@ public class MovieGameModel implements IObservable {
     public MovieGameModel() {
         this.gameState = new GameState();
         this.observers = new ArrayList<>();
+        this.hasChanged = false;
+        this.connectionsUsed = new HashMap<>();
     }
 
     /**
@@ -85,9 +88,10 @@ public class MovieGameModel implements IObservable {
     }
 
     /**
-     * @return the type of connection between two movies
+     * @return the type of connection between two movies. Return NULL
+     * if no connection is possible.
      */
-    private String getConnection(Movie movie1, Movie movie2) {
+    public String getConnection(Movie movie1, Movie movie2) {
 
         for (String actor : movie1.getActors()) {
             if (movie2.getActors().contains(actor)) {
@@ -122,9 +126,71 @@ public class MovieGameModel implements IObservable {
         return null;
     }
 
-    private String getConnectionName(Movie movie1, Movie movie2, String connectionType) {
+    /**
+     * @return the set of shared connection values based on the
+     * type of connection. Return NULL if no valid connection.
+     */
+    public Set<String> getConnectionNames(Movie movie1, Movie movie2, String connectionType) {
+        if (connectionType == null) {
+            return null;
+        }
+
+        switch (connectionType) {
+            case "actor":
+                Set<String> sharedActors = new HashSet<>(movie1.getActors());
+                sharedActors.retainAll(movie2.getActors());
+                return sharedActors;
+            case "director":
+                Set<String> sharedDirectors = new HashSet<>(movie1.getDirectors());
+                sharedDirectors.retainAll(movie2.getDirectors());
+                return sharedDirectors;
+            case "cinematographer":
+                Set<String> sharedCinematographers = new HashSet<>(movie1.getCinematographers());
+                sharedCinematographers.retainAll(movie2.getCinematographers());
+                return sharedCinematographers;
+            case "composer":
+                Set<String> sharedComposers = new HashSet<>(movie1.getComposers());
+                sharedComposers.retainAll(movie2.getComposers());
+                return sharedComposers;
+            case "writer":
+                Set<String> sharedWriters = new HashSet<>(movie1.getWriters());
+                sharedWriters.retainAll(movie2.getWriters());
+                return sharedWriters;
+            default:
+                return null;
+        }
+    }
+
+    /**
+     * @return a valid connection from set of connections found
+     * from getConnectionNames if it hasn't been used 3 times.
+     * Otherwise, returns NULL to signify no valid connections.
+     */
+    public String chooseConnection(Set<String> connections) {
+        if (connections.isEmpty()) {
+            return null;
+        }
+
+        for (String connection : connections) {
+            if (connectionsUsed.containsKey(connection)) {
+                // connection has been used less than 3 times, use connection
+                // otherwise go to next connection
+                if (connectionsUsed.get(connection) < 3) {
+                    connectionsUsed.put(connection, connectionsUsed.get(connection) + 1);
+                    return connection;
+                }
+                // add connection to map of used connections
+            } else {
+                connectionsUsed.put(connection, 1);
+                return connection;
+            }
+        }
+
+        // connection has been used max times
         return null;
     }
+
+
 
 
 }

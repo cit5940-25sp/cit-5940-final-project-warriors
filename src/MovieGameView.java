@@ -17,6 +17,7 @@ public class MovieGameView implements IObserver {
      */
     @Override
     public void update(String event) {
+
         switch (event) {
             case "GAME_START":
                 // get new display of game
