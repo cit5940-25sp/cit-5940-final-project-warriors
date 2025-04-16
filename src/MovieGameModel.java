@@ -84,4 +84,47 @@ public class MovieGameModel implements IObservable {
         }
     }
 
+    /**
+     * @return the type of connection between two movies
+     */
+    private String getConnection(Movie movie1, Movie movie2) {
+
+        for (String actor : movie1.getActors()) {
+            if (movie2.getActors().contains(actor)) {
+                return "actor";
+            }
+        }
+
+        for (String director : movie1.getDirectors()) {
+            if (movie2.getDirectors().contains(director)) {
+                return "director";
+            }
+        }
+
+        for (String cinematographer : movie1.getCinematographers()) {
+            if (movie2.getCinematographers().contains(cinematographer)) {
+                return "cinematographer";
+            }
+        }
+
+        for (String composer : movie1.getComposers()) {
+            if (movie2.getComposers().contains(composer)) {
+                return "composer";
+            }
+        }
+
+        for (String writer : movie1.getWriters()) {
+            if (movie2.getWriters().contains(writer)) {
+                return "writer";
+            }
+        }
+
+        return null;
+    }
+
+    private String getConnectionName(Movie movie1, Movie movie2, String connectionType) {
+        return null;
+    }
+
+
 }

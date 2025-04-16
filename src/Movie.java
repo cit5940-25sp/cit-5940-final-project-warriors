@@ -3,20 +3,20 @@ import java.util.*;
 public class Movie {
     private String title;
     private int releaseDate;
-    private List<String> genres;
-    private List<String> directors;
-    private List<String> actors;
-    private List<String> writers;
-    private List<String> cinematographers;
-    private List<String> composers;
+    private Set<String> genres;
+    private Set<String> directors;
+    private Set<String> actors;
+    private Set<String> writers;
+    private Set<String> cinematographers;
+    private Set<String> composers;
 
     public Movie(String title, int releaseDate,
-                 List<String> genres,
-                 List<String> directors,
-                 List<String> actors,
-                 List<String> writers,
-                 List<String> cinematographers,
-                 List<String> composers) {
+                 Set<String> genres,
+                 Set<String> directors,
+                 Set<String> actors,
+                 Set<String> writers,
+                 Set<String> cinematographers,
+                 Set<String> composers) {
         this.title = title;
         this.releaseDate = releaseDate;
         this.genres = genres;
@@ -31,7 +31,7 @@ public class Movie {
         return title;
     }
 
-    public void setTitle(String title) {
+    public void SetTitle(String title) {
         this.title = title;
     }
 
@@ -39,55 +39,55 @@ public class Movie {
         return releaseDate;
     }
 
-    public void setReleaseDate(int releaseDate) {
+    public void SetReleaseDate(int releaseDate) {
         this.releaseDate = releaseDate;
     }
 
-    public List<String> getGenres() {
+    public Set<String> getGenres() {
         return genres;
     }
 
-    public void setGenres(List<String> genres) {
+    public void SetGenres(Set<String> genres) {
         this.genres = genres;
     }
 
-    public List<String> getDirectors() {
+    public Set<String> getDirectors() {
         return directors;
     }
 
-    public void setDirectors(List<String> directors) {
+    public void SetDirectors(Set<String> directors) {
         this.directors = directors;
     }
 
-    public List<String> getActors() {
+    public Set<String> getActors() {
         return actors;
     }
 
-    public void setActors(List<String> actors) {
+    public void SetActors(Set<String> actors) {
         this.actors = actors;
     }
 
-    public List<String> getWriters() {
+    public Set<String> getWriters() {
         return writers;
     }
 
-    public void setWriters(List<String> writers) {
+    public void SetWriters(Set<String> writers) {
         this.writers = writers;
     }
 
-    public List<String> getCinematographers() {
+    public Set<String> getCinematographers() {
         return cinematographers;
     }
 
-    public void setCinematographers(List<String> cinematographers) {
+    public void SetCinematographers(Set<String> cinematographers) {
         this.cinematographers = cinematographers;
     }
 
-    public List<String> getComposers() {
+    public Set<String> getComposers() {
         return composers;
     }
 
-    public void setComposers(List<String> composers) {
+    public void SetComposers(Set<String> composers) {
         this.composers = composers;
     }
 
