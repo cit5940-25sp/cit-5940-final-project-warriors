@@ -91,7 +91,7 @@ public class MovieGameModel implements IObservable {
      * @return the type of connection between two movies. Return NULL
      * if no connection is possible.
      */
-    public String getConnection(Movie movie1, Movie movie2) {
+    public String getConnectionType(Movie movie1, Movie movie2) {
 
         for (String actor : movie1.getActors()) {
             if (movie2.getActors().contains(actor)) {
@@ -130,7 +130,7 @@ public class MovieGameModel implements IObservable {
      * @return the set of shared connection values based on the
      * type of connection. Return NULL if no valid connection.
      */
-    public Set<String> getConnectionNames(Movie movie1, Movie movie2, String connectionType) {
+    public Set<String> getConnection(Movie movie1, Movie movie2, String connectionType) {
         if (connectionType == null) {
             return null;
         }
@@ -163,7 +163,7 @@ public class MovieGameModel implements IObservable {
 
     /**
      * @return a valid connection from set of connections found
-     * from getConnectionNames if it hasn't been used 3 times.
+     * from getConnection if it hasn't been used 3 times.
      * Otherwise, returns NULL to signify no valid connections.
      */
     public String chooseConnection(Set<String> connections) {
