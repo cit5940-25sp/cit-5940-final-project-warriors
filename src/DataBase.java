@@ -47,4 +47,8 @@ public class DataBase {
             e.printStackTrace();
         }
     }
+
+    public Set<String> getPeopleByTitle(String title) {
+        return moviePeopleMap.getOrDefault(title, Collections.emptySet());
+    }
 }
