@@ -21,6 +21,7 @@ public class GameState {
         this.currentPlayer = player1;
     }
 
+
     /**
      *
      * @return the number of rounds played
