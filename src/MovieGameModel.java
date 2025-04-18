@@ -1,3 +1,6 @@
+import java.io.BufferedReader;
+import java.io.FileReader;
+import java.io.IOException;
 import java.util.*;
 
 public class MovieGameModel implements IObservable {
@@ -5,6 +8,7 @@ public class MovieGameModel implements IObservable {
     private GameState gameState;
     private List<IObserver> observers;
     private boolean hasChanged;
+    private Map<String, Set<String>> moviePeopleMap;
     private Map<String, Integer> connectionsUsed;
 
     /**
@@ -14,8 +18,52 @@ public class MovieGameModel implements IObservable {
         this.gameState = new GameState();
         this.observers = new ArrayList<>();
         this.hasChanged = false;
+        moviePeopleMap = new HashMap<>();
         this.connectionsUsed = new HashMap<>();
     }
+
+    public void loadFromCSV(String filePath) {
+        try (BufferedReader br = new BufferedReader(new FileReader(filePath))) {
+            String line;
+            boolean isFirstLine = true;
+
+            // Read each line from the CSV
+            while ((line = br.readLine()) != null) {
+                // Skip the header line
+                if (isFirstLine) {
+                    isFirstLine = false;
+                    continue;
+                }
+
+                // Split line by first comma (title, people)
+                int firstCommaIndex = line.indexOf(',');
+                if (firstCommaIndex == -1) continue;
+
+                String title = line.substring(0, firstCommaIndex).trim();
+                String peopleRaw = line.substring(firstCommaIndex + 1).trim();
+
+                // Remove quotes from the people string
+                if (peopleRaw.startsWith("\"") && peopleRaw.endsWith("\"")) {
+                    peopleRaw = peopleRaw.substring(1, peopleRaw.length() - 1);
+                }
+
+                // Split people by comma and add them to a set
+                String[] peopleArray = peopleRaw.split(",\\s*");
+                Set<String> peopleSet = new HashSet<>(Arrays.asList(peopleArray));
+
+                // Add the title and people set to the map
+                moviePeopleMap.put(title, peopleSet);
+            }
+
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
+
+    public Set<String> getPeopleByTitle(String title) {
+        return moviePeopleMap.getOrDefault(title, Collections.emptySet());
+    }
+
 
     /**
      * @return the current gameState
@@ -130,67 +178,69 @@ public class MovieGameModel implements IObservable {
      * @return the set of shared connection values based on the
      * type of connection. Return NULL if no valid connection.
      */
-    public Set<String> getConnection(Movie movie1, Movie movie2, String connectionType) {
+    public String getConnection(Movie movie1, Movie movie2, String connectionType) {
         if (connectionType == null) {
             return null;
         }
 
+        Set<String> movie1Set;
+        Set<String> movie2Set;
+
         switch (connectionType) {
             case "actor":
-                Set<String> sharedActors = new HashSet<>(movie1.getActors());
-                sharedActors.retainAll(movie2.getActors());
-                return sharedActors;
+                movie1Set = movie1.getActors();
+                movie2Set = movie2.getActors();
+                break;
             case "director":
-                Set<String> sharedDirectors = new HashSet<>(movie1.getDirectors());
-                sharedDirectors.retainAll(movie2.getDirectors());
-                return sharedDirectors;
+                movie1Set = movie1.getDirectors();
+                movie2Set = movie2.getDirectors();
+                break;
             case "cinematographer":
-                Set<String> sharedCinematographers = new HashSet<>(movie1.getCinematographers());
-                sharedCinematographers.retainAll(movie2.getCinematographers());
-                return sharedCinematographers;
+                movie1Set = movie1.getCinematographers();
+                movie2Set = movie2.getCinematographers();
+                break;
             case "composer":
-                Set<String> sharedComposers = new HashSet<>(movie1.getComposers());
-                sharedComposers.retainAll(movie2.getComposers());
-                return sharedComposers;
+                movie1Set = movie1.getComposers();
+                movie2Set = movie2.getComposers();
+                break;
             case "writer":
-                Set<String> sharedWriters = new HashSet<>(movie1.getWriters());
-                sharedWriters.retainAll(movie2.getWriters());
-                return sharedWriters;
+                movie1Set = movie1.getWriters();
+                movie2Set = movie2.getWriters();
+                break;
             default:
                 return null;
         }
-    }
 
-    /**
-     * @return a valid connection from set of connections found
-     * from getConnection if it hasn't been used 3 times.
-     * Otherwise, returns NULL to signify no valid connections.
-     */
-    public String chooseConnection(Set<String> connections) {
-        if (connections.isEmpty()) {
-            return null;
-        }
-
-        for (String connection : connections) {
-            if (connectionsUsed.containsKey(connection)) {
-                // connection has been used less than 3 times, use connection
-                // otherwise go to next connection
-                if (connectionsUsed.get(connection) < 3) {
-                    connectionsUsed.put(connection, connectionsUsed.get(connection) + 1);
-                    return connection;
-                }
-                // add connection to map of used connections
-            } else {
-                connectionsUsed.put(connection, 1);
-                return connection;
+        for (String name : movie1Set) {
+            if (movie2Set.contains(name)) {
+                return name;
             }
         }
 
-        // connection has been used max times
         return null;
     }
 
+    /**
+     * @return TRUE if the connection is valid, FALSE otherwise
+     */
+    public boolean checkConnection(Movie currentMovie, Movie nextMovie) {
+        String connectionType = getConnectionType(currentMovie, nextMovie);
 
+        if (connectionType == null) {
+            return false;
+        }
 
+        String connection = getConnection(currentMovie, nextMovie, connectionType);
+        if (connection == null) {
+            return false;
+        }
+
+        // check connection hasn't been used 3 or more times
+        if (connectionsUsed.getOrDefault(connection, 0) >= 3) {
+            return false;
+        }
+
+        return true;
+    }
 
 }
