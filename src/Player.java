@@ -101,6 +101,5 @@ public class Player {
      * adds an incorrect guess to set
      */
     public void updateIncorrectGuesses() {
-
     }
 }
