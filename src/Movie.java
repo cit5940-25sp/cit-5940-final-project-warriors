@@ -9,6 +9,7 @@ public class Movie {
     private Set<String> writers;
     private Set<String> cinematographers;
     private Set<String> composers;
+    private Set<String> allPeople;
 
     public Movie(String title, int releaseDate,
                  Set<String> genres,
@@ -25,6 +26,12 @@ public class Movie {
         this.writers = writers;
         this.cinematographers = cinematographers;
         this.composers = composers;
+        this.allPeople = new HashSet<>();
+        allPeople.addAll(directors);
+        allPeople.addAll(actors);
+        allPeople.addAll(writers);
+        allPeople.addAll(cinematographers);
+        allPeople.addAll(composers);
     }
 
     public String getTitle() {
@@ -89,6 +96,10 @@ public class Movie {
 
     public void SetComposers(Set<String> composers) {
         this.composers = composers;
+    }
+
+    public Set<String> getAllPeople() {
+        return allPeople;
     }
 
     @Override
