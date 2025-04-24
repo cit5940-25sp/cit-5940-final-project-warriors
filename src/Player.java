@@ -6,8 +6,8 @@ import java.util.Set;
 public class Player {
     String username;
     Map<String, Integer> connections;
-    Set<String> correctGuesses;
-    Set<String> incorrectGuesses;
+    Set<Movie> correctGuesses;
+    Set<Movie> incorrectGuesses;
 
     /**
      * Initialize a new Player
@@ -43,6 +43,10 @@ public class Player {
         return connections;
     }
 
+    public int retrieveConnection(String person) {
+        return getConnections().get(person);
+    }
+
     /**
      * Sets the connections map of the player
      * @param connections
@@ -51,11 +55,18 @@ public class Player {
         this.connections = connections;
     }
 
+    public void updateConnections(Set<String> connectionsToUpdate) {
+        for (String person : connectionsToUpdate) {
+            int current = connections.getOrDefault(person, 0);
+            connections.put(person, current + 1);
+        }
+    }
+
     /**
      *
      * @return the set of correct guesses
      */
-    public Set<String> getCorrectGuesses() {
+    public Set<Movie> getCorrectGuesses() {
         return correctGuesses;
     }
 
@@ -63,15 +74,19 @@ public class Player {
      * Sets the set of correct guesses
      * @param correctGuesses
      */
-    public void setCorrectGuesses(Set<String> correctGuesses) {
+    public void setCorrectGuesses(Set<Movie> correctGuesses) {
         this.correctGuesses = correctGuesses;
+    }
+
+    public void addToCorrectGuesses(Movie movie) {
+        correctGuesses.add(movie);
     }
 
     /**
      *
      * @return the set of incorrectguesses
      */
-    public Set<String> getIncorrectGuesses() {
+    public Set<Movie> getIncorrectGuesses() {
         return incorrectGuesses;
     }
 
@@ -79,27 +94,22 @@ public class Player {
      * Sets the set of incorrect guesses
      * @param incorrectGuesses
      */
-    public void setIncorrectGuesses(Set<String> incorrectGuesses) {
+    public void setIncorrectGuesses(Set<Movie> incorrectGuesses) {
         this.incorrectGuesses = incorrectGuesses;
-    }
-
-    /**
-     * update the connections hashmap with the connections in movie
-     * @param movie
-     */
-    public void updateMap(Movie movie) {
     }
 
     /**
      * adds a correct guess to the set
      */
-    public void updateCorrectGuesses() {
+    public void updateCorrectGuesses(Movie guess) {
+        this.correctGuesses.add(guess);
 
     }
 
     /**
      * adds an incorrect guess to set
      */
-    public void updateIncorrectGuesses() {
+    public void updateIncorrectGuesses(Movie guess) {
+        this.incorrectGuesses.add(guess);
     }
 }
