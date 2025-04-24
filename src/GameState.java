@@ -2,11 +2,12 @@ import java.util.*;
 
 public class GameState {
 
-    Player player1;
-    Player player2;
-    Player currentPlayer;
-    int roundsPlayed;
-    Queue<Movie> moviesPlayed;
+    private Player player1;
+    private Player player2;
+    private Player currentPlayer;
+    private int roundsPlayed;
+    private Deque<Movie> moviesPlayed;
+    private Set<Movie> moviesGuessed;
 
     /**
      * Initialize a new GameState
@@ -18,9 +19,9 @@ public class GameState {
         this.player2 = new Player(username2);
         this.roundsPlayed = 0;
         this.moviesPlayed = new ArrayDeque<>();
+        this.moviesGuessed = new HashSet<>();
         this.currentPlayer = player1;
     }
-
 
     /**
      *
@@ -34,7 +35,7 @@ public class GameState {
      *
      * @return a queue of the movies that have been played in order
      */
-    public Queue<Movie> getMoviesPlayed() {
+    public Deque<Movie> getMoviesPlayed() {
         return this.moviesPlayed;
     }
 
@@ -54,14 +55,46 @@ public class GameState {
         this.currentPlayer = player;
     }
 
-    public boolean validateGuess(Movie movie) {
+    /**
+     * Returns the most recently added movie
+     * @return
+     */
+    public Movie getMostRecentMovie() {
+        return getMoviesPlayed().peekLast();
+    }
+
+    public boolean validateGuess(Movie guess) {
+        // return false if guessed before
+        if (moviesGuessed.contains(guess)) {
+            currentPlayer.updateIncorrectGuesses(guess);
+            return false;
+        }
+        moviesGuessed.add(guess);
         // check the movie against the most recent movie in Queue
-            // use getConnection()
+        Set<String> connections = getConnections(guess, getMostRecentMovie());
         // if there are no connections then return false
+        if (connections.isEmpty()) {
+            currentPlayer.updateIncorrectGuesses(guess);
+            return false;
+        }
         // if there are connections but the currentPlayer has hit their limit
-            // then update currentPlayer's incorrectGuesses and return false
-        // otherwise, updateGuess() and return true
-        return false;
+        // then update currentPlayer's incorrectGuesses and return false
+        Set<String> toUpdate = new HashSet<>();
+        for (String person : connections) {
+            if (currentPlayer.retrieveConnection(person) >= 3) {
+                continue;
+            }
+            toUpdate.add(person);
+        }
+        // if all connections are at their limit, return false
+        if (toUpdate.isEmpty()) {
+            currentPlayer.updateIncorrectGuesses(guess);
+            return false;
+        }
+        moviesPlayed.add(guess); // add movie to played list
+        currentPlayer.updateConnections(toUpdate); // update connections
+        currentPlayer.updateCorrectGuesses(guess);
+        return true;
     }
 
     private void updateGuess() {
@@ -72,6 +105,11 @@ public class GameState {
     }
 
 
+    public Set<String> getConnections(Movie movie1, Movie movie2) {
+        Set<String> intersectionSet = movie1.getAllPeople();
+        intersectionSet.retainAll(movie2.getAllPeople());
+        return intersectionSet;
+    }
 
     /**
      * @return the type of connection between two movies. Return NULL
@@ -112,40 +150,40 @@ public class GameState {
         return null;
     }
 
-    /**
-     * @return the set of shared connection values based on the
-     * type of connection. Return NULL if no valid connection.
-     */
-    public Set<String> getConnection(Movie movie1, Movie movie2, String connectionType) {
-        if (connectionType == null) {
-            return null;
-        }
-
-        switch (connectionType) {
-            case "actor":
-                Set<String> sharedActors = new HashSet<>(movie1.getActors());
-                sharedActors.retainAll(movie2.getActors());
-                return sharedActors;
-            case "director":
-                Set<String> sharedDirectors = new HashSet<>(movie1.getDirectors());
-                sharedDirectors.retainAll(movie2.getDirectors());
-                return sharedDirectors;
-            case "cinematographer":
-                Set<String> sharedCinematographers = new HashSet<>(movie1.getCinematographers());
-                sharedCinematographers.retainAll(movie2.getCinematographers());
-                return sharedCinematographers;
-            case "composer":
-                Set<String> sharedComposers = new HashSet<>(movie1.getComposers());
-                sharedComposers.retainAll(movie2.getComposers());
-                return sharedComposers;
-            case "writer":
-                Set<String> sharedWriters = new HashSet<>(movie1.getWriters());
-                sharedWriters.retainAll(movie2.getWriters());
-                return sharedWriters;
-            default:
-                return null;
-        }
-    }
+//    /**
+//     * @return the set of shared connection values based on the
+//     * type of connection. Return NULL if no valid connection.
+//     */
+//    public Set<String> getConnection(Movie movie1, Movie movie2, String connectionType) {
+//        if (connectionType == null) {
+//            return null;
+//        }
+//
+//        switch (connectionType) {
+//            case "actor":
+//                Set<String> sharedActors = new HashSet<>(movie1.getActors());
+//                sharedActors.retainAll(movie2.getActors());
+//                return sharedActors;
+//            case "director":
+//                Set<String> sharedDirectors = new HashSet<>(movie1.getDirectors());
+//                sharedDirectors.retainAll(movie2.getDirectors());
+//                return sharedDirectors;
+//            case "cinematographer":
+//                Set<String> sharedCinematographers = new HashSet<>(movie1.getCinematographers());
+//                sharedCinematographers.retainAll(movie2.getCinematographers());
+//                return sharedCinematographers;
+//            case "composer":
+//                Set<String> sharedComposers = new HashSet<>(movie1.getComposers());
+//                sharedComposers.retainAll(movie2.getComposers());
+//                return sharedComposers;
+//            case "writer":
+//                Set<String> sharedWriters = new HashSet<>(movie1.getWriters());
+//                sharedWriters.retainAll(movie2.getWriters());
+//                return sharedWriters;
+//            default:
+//                return null;
+//        }
+//    }
 
 //    /**
 //     * @return a valid connection from set of connections found
