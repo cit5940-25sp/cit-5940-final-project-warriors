@@ -91,17 +91,19 @@ public class GameState {
             currentPlayer.updateIncorrectGuesses(guess);
             return false;
         }
-        moviesPlayed.add(guess); // add movie to played list
-        currentPlayer.updateConnections(toUpdate); // update connections
-        currentPlayer.updateCorrectGuesses(guess);
+        updateGuess(guess, toUpdate);
         return true;
     }
 
-    private void updateGuess() {
+    private void updateGuess(Movie guess, Set<String> connections) {
         // add to moviesPlayed queue
+        moviesPlayed.add(guess);
         // update currentPlayer's connections map
+        currentPlayer.updateConnections(connections); // update connections
         // update currentPlayer's correctGuesses
+        currentPlayer.updateCorrectGuesses(guess);
         // update currentPlayer to next player
+        currentPlayer = (currentPlayer == player1) ? player2 : player1;
     }
 
 
