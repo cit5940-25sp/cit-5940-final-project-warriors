@@ -64,7 +64,9 @@ public class GameState {
     }
 
     public boolean validateGuess(Movie guess) {
-        // return false if guessed before
+        // update roundsPlayed
+        roundsPlayed++;
+        // if guessed before
         if (moviesGuessed.contains(guess)) {
             currentPlayer.updateIncorrectGuesses(guess);
             return false;
@@ -78,7 +80,6 @@ public class GameState {
             return false;
         }
         // if there are connections but the currentPlayer has hit their limit
-        // then update currentPlayer's incorrectGuesses and return false
         Set<String> toUpdate = new HashSet<>();
         for (String person : connections) {
             if (currentPlayer.retrieveConnection(person) >= 3) {
@@ -91,6 +92,7 @@ public class GameState {
             currentPlayer.updateIncorrectGuesses(guess);
             return false;
         }
+        // valid guess
         updateGuess(guess, toUpdate);
         return true;
     }
