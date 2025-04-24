@@ -6,21 +6,29 @@ public class GameState {
     private Player player2;
     private Player currentPlayer;
     private int roundsPlayed;
-    private Deque<Movie> moviesPlayed;
-    private Set<Movie> moviesGuessed;
+    private Deque<Movie> lastFiveMovies;
+    private Map<Movie, Set<String>> lastFiveConnections;
+    private Set<Movie> allMovies;
 
     /**
      * Initialize a new GameState
      * @param username1
      * @param username2
      */
-    public GameState(String username1, String username2) {
+    public GameState(String username1, String username2, Movie startingMovie) {
         this.player1 = new Player(username1);
         this.player2 = new Player(username2);
         this.roundsPlayed = 0;
-        this.moviesPlayed = new ArrayDeque<>();
-        this.moviesGuessed = new HashSet<>();
-        this.currentPlayer = player1;
+        this.lastFiveMovies = new ArrayDeque<>(5);
+        this.lastFiveMovies.add(startingMovie);
+        this.lastFiveConnections = new HashMap<>(5);
+        this.lastFiveConnections.put(startingMovie, null);
+        this.allMovies = new HashSet<>();
+        this.allMovies.add(startingMovie);
+        // randomly decide which player is first
+        Random rand = new Random();
+        int binary = rand.nextInt(2);  // returns 0 or 1
+        this.currentPlayer = (binary == 0) ? player1 : player2;
     }
 
     /**
@@ -35,8 +43,16 @@ public class GameState {
      *
      * @return a queue of the movies that have been played in order
      */
-    public Deque<Movie> getMoviesPlayed() {
-        return this.moviesPlayed;
+    public Deque<Movie> getLastFiveMovies() {
+        return this.lastFiveMovies;
+    }
+
+    /**
+     *
+     * @return a queue of the movies that have been played in order
+     */
+    public Map<Movie, Set<String>> getLastFiveConnections() {
+        return this.lastFiveConnections;
     }
 
     /**
@@ -59,19 +75,19 @@ public class GameState {
      * Returns the most recently added movie
      * @return
      */
-    public Movie getMostRecentMovie() {
-        return getMoviesPlayed().peekLast();
+    private Movie getMostRecentMovie() {
+        return getLastFiveMovies().peekLast();
     }
 
     public boolean validateGuess(Movie guess) {
         // update roundsPlayed
         roundsPlayed++;
-        // if guessed before
-        if (moviesGuessed.contains(guess)) {
+        // if guessed before, even if incorrect
+        if (allMovies.contains(guess)) {
             currentPlayer.updateIncorrectGuesses(guess);
             return false;
         }
-        moviesGuessed.add(guess);
+        allMovies.add(guess);
         // check the movie against the most recent movie in Queue
         Set<String> connections = getConnections(guess, getMostRecentMovie());
         // if there are no connections then return false
@@ -98,18 +114,23 @@ public class GameState {
     }
 
     private void updateGuess(Movie guess, Set<String> connections) {
-        // add to moviesPlayed queue
-        moviesPlayed.add(guess);
-        // update currentPlayer's connections map
-        currentPlayer.updateConnections(connections); // update connections
-        // update currentPlayer's correctGuesses
-        currentPlayer.updateCorrectGuesses(guess);
+        // ensure lastFiveMovies and lastFiveConnections doesn't exceed 5
+        if (lastFiveMovies.size() == 5) {
+            lastFiveMovies.pollFirst();
+            lastFiveConnections.remove(guess);
+        }
+        // add to lastFive
+        lastFiveMovies.add(guess);
+        lastFiveConnections.put(guess, connections);
+        // update currentPlayer info
+        currentPlayer.updateConnections(connections); // connections map
+        currentPlayer.updateCorrectGuesses(guess); // correct guesses set
         // update currentPlayer to next player
         currentPlayer = (currentPlayer == player1) ? player2 : player1;
     }
 
 
-    public Set<String> getConnections(Movie movie1, Movie movie2) {
+    private Set<String> getConnections(Movie movie1, Movie movie2) {
         Set<String> intersectionSet = movie1.getAllPeople();
         intersectionSet.retainAll(movie2.getAllPeople());
         return intersectionSet;
