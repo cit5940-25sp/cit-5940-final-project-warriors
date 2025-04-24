@@ -4,10 +4,10 @@ import java.util.Map;
 import java.util.Set;
 
 public class Player {
-    String username;
-    Map<String, Integer> connections;
-    Set<Movie> correctGuesses;
-    Set<Movie> incorrectGuesses;
+    private String username;
+    private Map<String, Integer> connections;
+    private Set<Movie> correctGuesses;
+    private Set<Movie> incorrectGuesses;
 
     /**
      * Initialize a new Player
