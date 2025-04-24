@@ -1,3 +1,4 @@
+import java.util.HashSet;
 import java.util.Observable;
 
 public class MovieGameView implements IObserver {
@@ -35,6 +36,20 @@ public class MovieGameView implements IObserver {
                 // update the entire view
                 break;
         }
+    }
+
+    /**
+     * Gets the user's guess for a round of gameplay. Implements AutoComplete.
+     * @return Movie guess
+     */
+    public static Movie getUserGuess() {
+        // Convert String guess name into Movie object
+        // Returns Movie object
+        Movie guess = new Movie("Title", 1987,
+                new HashSet<>(), new HashSet<>(),
+                new HashSet<>(), new HashSet<>(),
+                new HashSet<>(), new HashSet<>());
+        return guess;
     }
 
 }
