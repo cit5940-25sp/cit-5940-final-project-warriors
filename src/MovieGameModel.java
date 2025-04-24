@@ -10,6 +10,7 @@ public class MovieGameModel implements IObservable {
     private boolean hasChanged;
     private Map<String, Set<String>> moviePeopleMap;
     private Map<String, Integer> connectionsUsed;
+    private Map<String, Movie> movieMap;
 
     /**
      * Initialize a new MovieGameModel
@@ -64,6 +65,16 @@ public class MovieGameModel implements IObservable {
         return moviePeopleMap.getOrDefault(title, Collections.emptySet());
     }
 
+    /**
+     * Generate a random movie to start the game with
+     * @return Movie
+     */
+    public Movie getRandomMovie() {
+        Set<String> keySet = movieMap.keySet();
+        int randomIndex = new Random().nextInt(keySet.size());
+        String randomKey = (String) keySet.toArray()[randomIndex];
+        return movieMap.get(randomKey);
+    }
 
     /**
      * @return the current gameState
