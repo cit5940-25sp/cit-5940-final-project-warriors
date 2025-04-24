@@ -15,7 +15,7 @@ public class MovieGameModel implements IObservable {
      * Initialize a new MovieGameModel
      */
     public MovieGameModel() {
-        this.gameState = new GameState();
+//        this.gameState = new GameState();
         this.observers = new ArrayList<>();
         this.hasChanged = false;
         moviePeopleMap = new HashMap<>();
