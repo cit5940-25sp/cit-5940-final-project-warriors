@@ -28,23 +28,15 @@ public class Player {
     }
 
     /**
-     * Sets the username of the player
-     * @param username
-     */
-    public void setUsername(String username) {
-        this.username = username;
-    }
-
-    /**
      *
      * @return the connections map of the player
      */
-    public Map<String, Integer> getConnections() {
+    public Map<String, Integer> getConnectionsMap() {
         return connections;
     }
 
-    public int retrieveConnection(String person) {
-        return getConnections().get(person);
+    public int getConnectionOfPerson(String person) {
+        return connections.get(person);
     }
 
     /**
@@ -71,40 +63,21 @@ public class Player {
     }
 
     /**
-     * Sets the set of correct guesses
-     * @param correctGuesses
-     */
-    public void setCorrectGuesses(Set<Movie> correctGuesses) {
-        this.correctGuesses = correctGuesses;
-    }
-
-    public void addToCorrectGuesses(Movie movie) {
-        correctGuesses.add(movie);
-    }
-
-    /**
-     *
-     * @return the set of incorrectguesses
-     */
-    public Set<Movie> getIncorrectGuesses() {
-        return incorrectGuesses;
-    }
-
-    /**
-     * Sets the set of incorrect guesses
-     * @param incorrectGuesses
-     */
-    public void setIncorrectGuesses(Set<Movie> incorrectGuesses) {
-        this.incorrectGuesses = incorrectGuesses;
-    }
-
-    /**
      * adds a correct guess to the set
      */
     public void updateCorrectGuesses(Movie guess) {
         this.correctGuesses.add(guess);
 
     }
+
+    /**
+     *
+     * @return the set of incorrect guesses
+     */
+    public Set<Movie> getIncorrectGuesses() {
+        return incorrectGuesses;
+    }
+
 
     /**
      * adds an incorrect guess to set

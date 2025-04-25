@@ -1,10 +1,13 @@
 public class MovieGameController{
     private static final int TIME_LIMIT = 15;
+
     private MovieGameModel model;
     private MovieGameView view;
     private Database database;
+
     private Thread timerThread;
     private boolean timeUp;
+
     private int numRounds;
     private boolean gameOver;
 
@@ -43,6 +46,7 @@ public class MovieGameController{
     public void setUp() {
         while (!gameOver) {
             newRound();
+            numRounds++;
         }
     }
 

@@ -5,6 +5,7 @@ import java.util.Set;
 public class MovieGameView implements IObserver {
     private MovieGameModel model;
     private Set<String> movieNames;
+    private Autocomplete autocomplete;
 
     /**
      * Initializes a new MovieGameView
@@ -12,6 +13,7 @@ public class MovieGameView implements IObserver {
     public MovieGameView(MovieGameModel model, Set<String> movieNames) {
         this.model = model;
         this.movieNames = movieNames;
+        this.autocomplete = new Autocomplete();
         model.addObserver(this);
     }
 

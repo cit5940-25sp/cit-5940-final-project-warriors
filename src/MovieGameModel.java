@@ -76,7 +76,7 @@ public class MovieGameModel implements IObservable {
         // if there are connections but the currentPlayer has hit their limit
         Set<String> toUpdate = new HashSet<>();
         for (String person : connections) {
-            if (currentPlayer.retrieveConnection(person) >= 3) {
+            if (currentPlayer.getConnectionOfPerson(person) >= 3) {
                 continue;
             }
             toUpdate.add(person);
