@@ -1,3 +1,5 @@
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Observable;
 
 public interface IObserver {
@@ -8,5 +10,6 @@ public interface IObserver {
      * INVALID_MOVE, GAME_END)
      */
     public void update(String event);
+
 
 }

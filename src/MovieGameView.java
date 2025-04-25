@@ -1,14 +1,17 @@
 import java.util.HashSet;
 import java.util.Observable;
+import java.util.Set;
 
 public class MovieGameView implements IObserver {
     private MovieGameModel model;
+    private Set<String> movieNames;
 
     /**
      * Initializes a new MovieGameView
      */
-    public MovieGameView(MovieGameModel model) {
+    public MovieGameView(MovieGameModel model, Set<String> movieNames) {
         this.model = model;
+        this.movieNames = movieNames;
         model.addObserver(this);
     }
 
@@ -40,16 +43,10 @@ public class MovieGameView implements IObserver {
 
     /**
      * Gets the user's guess for a round of gameplay. Implements AutoComplete.
-     * @return Movie guess
+     * @return String name of guess
      */
-    public static Movie getUserGuess() {
-        // Convert String guess name into Movie object
-        // Returns Movie object
-        Movie guess = new Movie("Title", 1987,
-                new HashSet<>(), new HashSet<>(),
-                new HashSet<>(), new HashSet<>(),
-                new HashSet<>(), new HashSet<>());
-        return guess;
+    public static String getUserGuess() {
+        return "";
     }
 
 }

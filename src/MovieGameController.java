@@ -1,21 +1,23 @@
-import java.util.Timer;
-
 public class MovieGameController{
     private static final int TIME_LIMIT = 15;
-    private GameState gameState;
-    private MovieGameModel gameModel;
+    private MovieGameModel model;
+    private MovieGameView view;
+    private Database database;
     private Thread timerThread;
     private boolean timeUp;
     private int numRounds;
+    private boolean gameOver;
 
     /**
      * Initialize a new MovieGameController
      */
     public MovieGameController(String username1, String username2) {
-        this.gameModel = new MovieGameModel();
-        Movie startingMovie = gameModel.getRandomMovie(); // get starting movie
-        this.gameState = new GameState(username1, username2, startingMovie);
+        this.database = new Database();
+        Movie startingMovie = database.getRandomMovie(); // get starting movie from database
+        this.model = new MovieGameModel(username1, username2, startingMovie);
+        this.view = new MovieGameView(model, database.getMovieNameSet());
         this.numRounds = 0;
+        this.gameOver = false;
 
         // initialize time thread runnable input
         timerThread = new Thread(() -> {
@@ -39,7 +41,7 @@ public class MovieGameController{
      * Run game
      */
     public void setUp() {
-        while (true) {
+        while (!gameOver) {
             newRound();
         }
     }
@@ -51,12 +53,13 @@ public class MovieGameController{
         timerThread.start();
 
         // gets user input on main thread
-        Movie guess = MovieGameView.getUserGuess();
+        String name = MovieGameView.getUserGuess();
+        Movie guess = database.getMovieByName(name);
 
         if (!timeUp) {
             // User guessed in time
             timerThread.interrupt(); // stop timer thread
-            if (!gameState.validateGuess(guess)) {
+            if (!model.validateGuess(guess)) {
                 System.out.println("Invalid guess.");
             } else {
                 System.out.println("Good guess!");

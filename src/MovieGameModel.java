@@ -1,87 +1,119 @@
-import java.io.BufferedReader;
-import java.io.FileReader;
-import java.io.IOException;
 import java.util.*;
 
 public class MovieGameModel implements IObservable {
 
-    private GameState gameState;
+    private Player player1;
+    private Player player2;
+    private Player currentPlayer;
+    private Deque<Movie> lastFiveMovies;
+    private Map<Movie, Set<String>> lastFiveConnections;
+    private Set<Movie> allMovies;
     private List<IObserver> observers;
     private boolean hasChanged;
-    private Map<String, Set<String>> moviePeopleMap;
-    private Map<String, Integer> connectionsUsed;
-    private Map<String, Movie> movieMap;
 
     /**
-     * Initialize a new MovieGameModel
+     * Initialize a new GameState
+     * @param username1
+     * @param username2
      */
-    public MovieGameModel() {
-//        this.gameState = new GameState();
+    public MovieGameModel(String username1, String username2, Movie startingMovie) {
+        this.player1 = new Player(username1);
+        this.player2 = new Player(username2);
+        this.lastFiveMovies = new ArrayDeque<>(5);
+        this.lastFiveConnections = new HashMap<>(5);
+        this.allMovies = new HashSet<>();
         this.observers = new ArrayList<>();
-        this.hasChanged = false;
-        moviePeopleMap = new HashMap<>();
-        this.connectionsUsed = new HashMap<>();
+
+        // initialize state with starting movie
+        this.lastFiveMovies.add(startingMovie);
+        this.lastFiveConnections.put(startingMovie, null);
+        this.allMovies.add(startingMovie);
+
+        // randomly starting player
+        Random rand = new Random();
+        int binary = rand.nextInt(2);  // returns 0 or 1
+        this.currentPlayer = (binary == 0) ? player1 : player2;
     }
 
-    public void loadFromCSV(String filePath) {
-        try (BufferedReader br = new BufferedReader(new FileReader(filePath))) {
-            String line;
-            boolean isFirstLine = true;
+    /**
+     *
+     * @return a queue of the movies that have been played in order
+     */
+    public Deque<Movie> getLastFiveMovies() {
+        return this.lastFiveMovies;
+    }
 
-            // Read each line from the CSV
-            while ((line = br.readLine()) != null) {
-                // Skip the header line
-                if (isFirstLine) {
-                    isFirstLine = false;
-                    continue;
-                }
+    /**
+     *
+     * @return a queue of the movies that have been played in order
+     */
+    public Map<Movie, Set<String>> getLastFiveConnections() {
+        return this.lastFiveConnections;
+    }
 
-                // Split line by first comma (title, people)
-                int firstCommaIndex = line.indexOf(',');
-                if (firstCommaIndex == -1) continue;
+    /**
+     * Returns the most recently added movie
+     * @return
+     */
+    private Movie getMostRecentMovie() {
+        return getLastFiveMovies().peekLast();
+    }
 
-                String title = line.substring(0, firstCommaIndex).trim();
-                String peopleRaw = line.substring(firstCommaIndex + 1).trim();
-
-                // Remove quotes from the people string
-                if (peopleRaw.startsWith("\"") && peopleRaw.endsWith("\"")) {
-                    peopleRaw = peopleRaw.substring(1, peopleRaw.length() - 1);
-                }
-
-                // Split people by comma and add them to a set
-                String[] peopleArray = peopleRaw.split(",\\s*");
-                Set<String> peopleSet = new HashSet<>(Arrays.asList(peopleArray));
-
-                // Add the title and people set to the map
-                moviePeopleMap.put(title, peopleSet);
-            }
-
-        } catch (IOException e) {
-            e.printStackTrace();
+    public boolean validateGuess(Movie guess) {
+        // if guessed before, even if incorrect
+        if (allMovies.contains(guess)) {
+            currentPlayer.updateIncorrectGuesses(guess);
+            return false;
         }
+        allMovies.add(guess);
+        // check the movie against the most recent movie in Queue
+        Set<String> connections = getConnections(guess, getMostRecentMovie());
+        // if there are no connections then return false
+        if (connections.isEmpty()) {
+            currentPlayer.updateIncorrectGuesses(guess);
+            return false;
+        }
+        // if there are connections but the currentPlayer has hit their limit
+        Set<String> toUpdate = new HashSet<>();
+        for (String person : connections) {
+            if (currentPlayer.retrieveConnection(person) >= 3) {
+                continue;
+            }
+            toUpdate.add(person);
+        }
+        // if all connections are at their limit, return false
+        if (toUpdate.isEmpty()) {
+            currentPlayer.updateIncorrectGuesses(guess);
+            return false;
+        }
+        // valid guess
+        updateGuess(guess, toUpdate);
+        return true;
     }
 
-    public Set<String> getPeopleByTitle(String title) {
-        return moviePeopleMap.getOrDefault(title, Collections.emptySet());
+    private void updateGuess(Movie guess, Set<String> connections) {
+        // ensure lastFiveMovies and lastFiveConnections doesn't exceed 5
+        if (lastFiveMovies.size() == 5) {
+            lastFiveMovies.pollFirst();
+            lastFiveConnections.remove(guess);
+        }
+        // add to lastFive
+        lastFiveMovies.add(guess);
+        lastFiveConnections.put(guess, connections);
+        // update currentPlayer info
+        currentPlayer.updateConnections(connections); // connections map
+        currentPlayer.updateCorrectGuesses(guess); // correct guesses set
+        // update currentPlayer to next player
+        currentPlayer = (currentPlayer == player1) ? player2 : player1;
     }
 
-    /**
-     * Generate a random movie to start the game with
-     * @return Movie
-     */
-    public Movie getRandomMovie() {
-        Set<String> keySet = movieMap.keySet();
-        int randomIndex = new Random().nextInt(keySet.size());
-        String randomKey = (String) keySet.toArray()[randomIndex];
-        return movieMap.get(randomKey);
+
+    private Set<String> getConnections(Movie movie1, Movie movie2) {
+        Set<String> intersectionSet = movie1.getAllPeople();
+        intersectionSet.retainAll(movie2.getAllPeople());
+        return intersectionSet;
     }
 
-    /**
-     * @return the current gameState
-     */
-    public GameState getGameState() {
-        return gameState;
-    }
 
     /**
      * Adds a new observer
@@ -144,114 +176,6 @@ public class MovieGameModel implements IObservable {
                 observer.update(event);
             }
         }
-    }
-
-    /**
-     * @return the type of connection between two movies. Return NULL
-     * if no connection is possible.
-     */
-    public String getConnectionType(Movie movie1, Movie movie2) {
-
-        for (String actor : movie1.getActors()) {
-            if (movie2.getActors().contains(actor)) {
-                return "actor";
-            }
-        }
-
-        for (String director : movie1.getDirectors()) {
-            if (movie2.getDirectors().contains(director)) {
-                return "director";
-            }
-        }
-
-        for (String cinematographer : movie1.getCinematographers()) {
-            if (movie2.getCinematographers().contains(cinematographer)) {
-                return "cinematographer";
-            }
-        }
-
-        for (String composer : movie1.getComposers()) {
-            if (movie2.getComposers().contains(composer)) {
-                return "composer";
-            }
-        }
-
-        for (String writer : movie1.getWriters()) {
-            if (movie2.getWriters().contains(writer)) {
-                return "writer";
-            }
-        }
-
-        return null;
-    }
-
-    /**
-     * @return the set of shared connection values based on the
-     * type of connection. Return NULL if no valid connection.
-     */
-    public String getConnection(Movie movie1, Movie movie2, String connectionType) {
-        if (connectionType == null) {
-            return null;
-        }
-
-        Set<String> movie1Set;
-        Set<String> movie2Set;
-
-        switch (connectionType) {
-            case "actor":
-                movie1Set = movie1.getActors();
-                movie2Set = movie2.getActors();
-                break;
-            case "director":
-                movie1Set = movie1.getDirectors();
-                movie2Set = movie2.getDirectors();
-                break;
-            case "cinematographer":
-                movie1Set = movie1.getCinematographers();
-                movie2Set = movie2.getCinematographers();
-                break;
-            case "composer":
-                movie1Set = movie1.getComposers();
-                movie2Set = movie2.getComposers();
-                break;
-            case "writer":
-                movie1Set = movie1.getWriters();
-                movie2Set = movie2.getWriters();
-                break;
-            default:
-                return null;
-        }
-
-        for (String name : movie1Set) {
-            if (movie2Set.contains(name)) {
-                return name;
-            }
-        }
-
-        return null;
-    }
-
-    /**
-     * @return TRUE if the connection is valid, FALSE otherwise
-     */
-    public boolean checkConnection(Movie currentMovie, Movie nextMovie) {
-        String connectionType = getConnectionType(currentMovie, nextMovie);
-
-        if (connectionType == null) {
-            return false;
-        }
-
-        String connection = getConnection(currentMovie, nextMovie, connectionType);
-        if (connection == null) {
-            return false;
-        }
-
-        // check connection hasn't been used 3 or more times
-        if (connectionsUsed.getOrDefault(connection, 0) >= 3) {
-            return false;
-        }
-
-        return true;
     }
 
 }
