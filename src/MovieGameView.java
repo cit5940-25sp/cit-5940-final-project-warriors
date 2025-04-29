@@ -1,3 +1,7 @@
+import com.googlecode.lanterna.TextCharacter;
+import com.googlecode.lanterna.TextColor;
+import com.googlecode.lanterna.screen.Screen;
+
 import java.util.HashSet;
 import java.util.Observable;
 import java.util.Set;
@@ -6,6 +10,7 @@ public class MovieGameView implements IObserver {
     private MovieGameModel model;
     private Set<String> movieNames;
     private Autocomplete autocomplete;
+    private Screen screen;
 
     /**
      * Initializes a new MovieGameView
