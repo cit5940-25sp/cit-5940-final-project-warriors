@@ -17,21 +17,29 @@ public class TerminalWithSuggestions {
     private StringBuilder currentInput = new StringBuilder();
     private List<String> suggestions = new ArrayList<>();
     private int cursorPosition = 0;
+    Autocomplete autocomplete;
 
     // Timer variables
     private int                      secondsRemaining = 60;
     private boolean                  timerRunning = true;
     private ScheduledExecutorService scheduler;
+    Database database = new Database();
 
     public TerminalWithSuggestions() throws IOException {
         terminal = new DefaultTerminalFactory().createTerminal();
         screen = new TerminalScreen(terminal);
         screen.startScreen();
 
-        dictionary = Arrays.asList(
-                "java", "javascript", "python", "terminal", "program",
-                "code", "compiler", "development", "interface", "application"
-        );
+
+        database.loadFromCSV("cleaned_imdb_final.csv");
+        List<String> titles = new ArrayList<>(database.getMovieNameSet());
+        dictionary = new ArrayList<>();
+        for (String movieName : titles) {
+            movieName = movieName.toLowerCase();
+            dictionary.add(movieName);
+        }
+        System.out.println(dictionary);
+
 
         // Initialize timer thread
         scheduler = Executors.newScheduledThreadPool(1);
