@@ -68,7 +68,7 @@ public class TerminalWithSuggestions {
             if (keyStroke != null) {
                 switch (keyStroke.getKeyType()) {
                     case Character:
-                        handleCharacter(keyStroke.getCharacter());
+                        handleCharacter(Character.toLowerCase(keyStroke.getCharacter()));
                         break;
                     case Backspace:
                         handleBackspace();
