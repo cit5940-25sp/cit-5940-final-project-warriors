@@ -20,10 +20,17 @@ public class TerminalWithSuggestions {
     Autocomplete autocomplete;
 
     // Timer variables
-    private int                      secondsRemaining = 60;
+    private int                      secondsRemaining = 30;
     private boolean                  timerRunning = true;
     private ScheduledExecutorService scheduler;
-    Database database = new Database();
+    private Database database = new Database();
+    private String selectedTitle = "";
+    private int suggestionIndex = 0;
+    private int roundNumber = 0;
+
+    private Deque<String> movieHistory = new ArrayDeque<>();
+    private static final int MAX_HISTORY_SIZE = 5;
+
 
     public TerminalWithSuggestions() throws IOException {
         terminal = new DefaultTerminalFactory().createTerminal();
@@ -59,14 +66,24 @@ public class TerminalWithSuggestions {
         boolean running = true;
 
         screen.clear();
-        printString(0, 0, "> ");
+
         cursorPosition = 2;
         updateScreen();
 
         while (running) {
-            KeyStroke keyStroke = terminal.pollInput();
+            KeyStroke keyStroke = screen.pollInput();
             if (keyStroke != null) {
                 switch (keyStroke.getKeyType()) {
+                    case ArrowUp:
+                        if (suggestionIndex > 0) {
+                            suggestionIndex--;
+                        }
+                        break;
+                    case ArrowDown:
+                        if (suggestionIndex < suggestions.size() - 1) {
+                            suggestionIndex++;
+                        }
+                        break;
                     case Character:
                         handleCharacter(Character.toLowerCase(keyStroke.getCharacter()));
                         break;
@@ -115,9 +132,27 @@ public class TerminalWithSuggestions {
     }
 
     private void handleEnter() throws IOException {
+        if (!suggestions.isEmpty()) {
+            selectedTitle = suggestions.get(suggestionIndex);
+        } else {
+            selectedTitle = currentInput.toString();
+        }
+        if (!selectedTitle.isEmpty()) {
+            selectedTitle = capitalizeTitle(selectedTitle);
+            movieHistory.addLast(selectedTitle);
+            if (movieHistory.size() > MAX_HISTORY_SIZE) {
+                movieHistory.removeFirst();
+            }
+        }
+
         int currentRow = screen.getCursorPosition().getRow();
         currentRow += 1 + suggestions.size();
         printString(0, currentRow, "> ");
+
+        // add valid check logic using selectedTitle
+        secondsRemaining = 30;
+
+        roundNumber++;
         currentInput = new StringBuilder();
         cursorPosition = 2;
         suggestions.clear();
@@ -134,27 +169,66 @@ public class TerminalWithSuggestions {
                 }
             }
         }
+
+        suggestionIndex = 0;
     }
 
     private void updateScreen() throws IOException {
         synchronized (screen) {
             screen.clear();
-
-            // Print timer at top right
-            String timerText = "Time: " + secondsRemaining + "s";
             TerminalSize size = screen.getTerminalSize();
-            printString(size.getColumns() - timerText.length(), 0, timerText);
 
-            // Print current command line
-            printString(0, 0, "> " + currentInput.toString());
+            // Print title centered at the top
+            String title = "Movie Battle";
+            int titleCol = (size.getColumns() - title.length()) / 2;
+            printString(titleCol, 0, title);
 
-            // Print suggestions
-            int row = 1;
-            for (String suggestion : suggestions) {
-                printString(2, row++, suggestion);
+            // Print movie history in bottom-right
+            int startRow = size.getRows() - MAX_HISTORY_SIZE - 2;
+            int startCol = Math.max(0, size.getColumns() - 40);
+            printString(startCol, startRow - 1, "Recently Used");
+            int k = 0;
+            for (String t : movieHistory) {
+                String display = (k + 1) + ". " + capitalizeTitle(t);
+                printString(startCol, startRow + k, display);
+                k++;
             }
 
-            screen.setCursorPosition(new TerminalPosition(cursorPosition, 0));
+
+            // Print timer at top right
+            String timerText = secondsRemaining + "s";
+            printString(titleCol + 5, 4, timerText);
+
+            printString(0, 1, "Round: " + roundNumber);
+            printString(0, 2, "Current Player: ");
+
+            printColoredString(8, 4, "Player 1 ", TextColor.ANSI.BLUE_BRIGHT);
+            printColoredString(60, 4, "Player 2 ", TextColor.ANSI.RED);
+            // Print current command line
+            printString(0, 6, "> " + currentInput.toString());
+
+            // Print suggestions
+            int row = 7;
+            for (int i = 0; i < suggestions.size(); i++) {
+                String suggestion = capitalizeTitle(suggestions.get(i));
+                if (i == suggestionIndex) {
+                    for (int j = 0; j < suggestion.length(); j++) {
+                        screen.setCharacter(2 + j, row, new TextCharacter(
+                                suggestion.charAt(j),
+                                TextColor.ANSI.BLACK, TextColor.ANSI.WHITE));
+                    }
+                } else {
+                    printString(2, row, suggestion);
+                }
+                row++;
+            }
+
+
+            int selectedRow = size.getRows() - 10;
+            printColoredString(0, selectedRow, "Selected: ", TextColor.ANSI.GREEN);
+            printColoredString(10, selectedRow, selectedTitle, TextColor.ANSI.WHITE);
+
+            screen.setCursorPosition(new TerminalPosition(cursorPosition, 6));
             screen.refresh();
         }
     }
@@ -166,6 +240,30 @@ public class TerminalWithSuggestions {
                             TextColor.ANSI.WHITE, TextColor.ANSI.BLACK));
         }
     }
+
+    private void printColoredString(int column, int row, String text, TextColor color) {
+        for (int i = 0; i < text.length(); i++) {
+            screen.setCharacter(column + i, row,
+                    new TextCharacter(text.charAt(i),
+                            color, TextColor.ANSI.BLACK));
+        }
+    }
+
+    private String capitalizeTitle(String title) {
+        String[] words = title.split(" ");
+        StringBuilder capitalizedTitle = new StringBuilder();
+
+        for (String word : words) {
+            if (!word.isEmpty()) {
+                capitalizedTitle.append(Character.toUpperCase(word.charAt(0)))
+                        .append(word.substring(1).toLowerCase()).append(" ");
+            }
+        }
+
+        return capitalizedTitle.toString().trim();
+    }
+
+
 
     public static void main(String[] args) {
         try {
