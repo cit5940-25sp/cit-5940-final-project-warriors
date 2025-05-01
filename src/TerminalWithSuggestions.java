@@ -139,9 +139,9 @@ public class TerminalWithSuggestions {
         }
         if (!selectedTitle.isEmpty()) {
             selectedTitle = capitalizeTitle(selectedTitle);
-            movieHistory.addLast(selectedTitle);
+            movieHistory.addFirst(selectedTitle);
             if (movieHistory.size() > MAX_HISTORY_SIZE) {
-                movieHistory.removeFirst();
+                movieHistory.removeLast();
             }
         }
 
@@ -178,21 +178,28 @@ public class TerminalWithSuggestions {
             screen.clear();
             TerminalSize size = screen.getTerminalSize();
 
-            // Print title centered at the top
             String title = "Movie Battle";
             int titleCol = (size.getColumns() - title.length()) / 2;
-            printString(titleCol, 0, title);
+            printColoredString(titleCol, 0, title, TextColor.ANSI.MAGENTA_BRIGHT);
 
-            // Print movie history in bottom-right
-            int startRow = size.getRows() - MAX_HISTORY_SIZE - 2;
-            int startCol = Math.max(0, size.getColumns() - 40);
-            printString(startCol, startRow - 1, "Recently Used");
+
+            int startRow = size.getRows() - MAX_HISTORY_SIZE - 6;
+            int centerCol = size.getColumns() / 2;
+
             int k = 0;
             for (String t : movieHistory) {
-                String display = (k + 1) + ". " + capitalizeTitle(t);
-                printString(startCol, startRow + k, display);
+                String titleCap = capitalizeTitle(t);
+                int col = centerCol - titleCap.length() / 2;
+
+                if (k > 0) {
+                    printColoredString(centerCol, startRow + 2 * k - 1, "|", TextColor.ANSI.GREEN_BRIGHT);
+                }
+
+                printString(col, startRow + 2 * k, titleCap);
                 k++;
             }
+
+
 
 
             // Print timer at top right
@@ -225,8 +232,8 @@ public class TerminalWithSuggestions {
 
 
             int selectedRow = size.getRows() - 10;
-            printColoredString(0, selectedRow, "Selected: ", TextColor.ANSI.GREEN);
-            printColoredString(10, selectedRow, selectedTitle, TextColor.ANSI.WHITE);
+//            printColoredString(0, selectedRow, "Selected: ", TextColor.ANSI.GREEN);
+//            printColoredString(10, selectedRow, selectedTitle, TextColor.ANSI.WHITE);
 
             screen.setCursorPosition(new TerminalPosition(cursorPosition, 6));
             screen.refresh();
