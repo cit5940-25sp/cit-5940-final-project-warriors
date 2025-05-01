@@ -180,7 +180,7 @@ public class TerminalWithSuggestions {
 
             String title = "Movie Battle";
             int titleCol = (size.getColumns() - title.length()) / 2;
-            printColoredString(titleCol, 0, title, TextColor.ANSI.MAGENTA_BRIGHT);
+            printColoredString(titleCol + 1, 0, title, TextColor.ANSI.MAGENTA_BRIGHT);
 
 
             int startRow = size.getRows() - MAX_HISTORY_SIZE - 6;
