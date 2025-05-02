@@ -17,7 +17,6 @@ public class TerminalWithSuggestions {
     private StringBuilder currentInput = new StringBuilder();
     private List<String> suggestions = new ArrayList<>();
     private int cursorPosition = 0;
-    Autocomplete autocomplete;
 
     private int secondsRemaining = 30;
     private boolean timerRunning = true;
@@ -57,6 +56,12 @@ public class TerminalWithSuggestions {
                 } catch (IOException e) {
                     e.printStackTrace();
                 }
+            } else if (secondsRemaining == 0 && gameStarted) {
+                try {
+                    gameOver();
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
             }
         }, 1, 1, TimeUnit.SECONDS);
     }
@@ -76,9 +81,20 @@ public class TerminalWithSuggestions {
                     continue;
                 }
 
+                if (secondsRemaining == 0) {
+                    break;
+                }
+
                 switch (keyStroke.getKeyType()) {
                     case ArrowUp:
+                        if (!suggestions.isEmpty()) {
+                            suggestionIndex = (suggestionIndex - 1 + suggestions.size()) % suggestions.size();
+                        }
+                        break;
                     case ArrowDown:
+                        if (!suggestions.isEmpty()) {
+                            suggestionIndex = (suggestionIndex + 1) % suggestions.size();
+                        }
                         break;
                     case Character:
                         handleCharacter(Character.toLowerCase(keyStroke.getCharacter()));
@@ -106,6 +122,7 @@ public class TerminalWithSuggestions {
             }
         }
 
+        // After game over or exit
         scheduler.shutdown();
         screen.close();
         terminal.close();
@@ -208,6 +225,10 @@ public class TerminalWithSuggestions {
     }
 
     private void updateScreen() throws IOException {
+        if (secondsRemaining == 0 && gameStarted) {
+            return;
+        }
+
         screen.clear();
         TerminalSize size = screen.getTerminalSize();
 
@@ -286,6 +307,83 @@ public class TerminalWithSuggestions {
         }
         return capitalizedTitle.toString().trim();
     }
+
+    private void gameOver() throws IOException {
+        screen.clear();
+        screen.setCursorPosition(new TerminalPosition(-1, -1));
+
+        int terminalWidth = screen.getTerminalSize().getColumns();
+        int terminalHeight = screen.getTerminalSize().getRows();
+
+        String gameOverMessage = "Game Over!";
+        int gameOverCol = (terminalWidth - gameOverMessage.length()) / 2;
+        String winnerMessage = (roundNumber % 2 == 0 ? player1Name : player2Name) + " Wins!!";
+        int winnerCol = (terminalWidth - winnerMessage.length()) / 2;
+        printColoredString(winnerCol, terminalHeight / 2 + 1, winnerMessage, TextColor.ANSI.YELLOW_BRIGHT);
+        printColoredString(gameOverCol, terminalHeight / 2, gameOverMessage, TextColor.ANSI.RED);
+
+        String restartMessage = "Press R to play again or Q to quit.";
+        int restartCol = (terminalWidth - restartMessage.length()) / 2;
+        printColoredString(restartCol, terminalHeight / 2 + 2, restartMessage, TextColor.ANSI.WHITE);
+
+        screen.refresh();
+
+        boolean waitingForInput = true;
+        while (waitingForInput) {
+            KeyStroke keyStroke = screen.pollInput();
+            if (keyStroke != null) {
+                if (keyStroke.getKeyType() == KeyType.Character) {
+                    char choice = Character.toUpperCase(keyStroke.getCharacter());
+                    if (choice == 'R') {
+                        restartGame();
+                        waitingForInput = false;
+                    } else if (choice == 'Q') {
+                        exitGame();
+                        waitingForInput = false;
+                    }
+                }
+            }
+            try {
+                Thread.sleep(10);
+            } catch (InterruptedException e) {
+                Thread.currentThread().interrupt();
+            }
+        }
+    }
+
+    private void restartGame() throws IOException {
+        movieHistory.clear();
+        currentInput = new StringBuilder();
+        suggestions.clear();
+        roundNumber = 0;
+        secondsRemaining = 30;
+        gameStarted = false;
+        enteringPlayer1 = true;
+        player1Name = "";
+        player2Name = "";
+
+        screen.clear();
+        showLandingScreen();
+        screen.refresh();
+    }
+
+    private void exitGame() throws IOException {
+        screen.clear();
+        String exitMessage = "Thanks for playing! Exiting...";
+        int exitCol = (screen.getTerminalSize().getColumns() - exitMessage.length()) / 2;
+        printColoredString(exitCol, screen.getTerminalSize().getRows() / 2, exitMessage, TextColor.ANSI.CYAN);
+        screen.refresh();
+
+        try {
+            Thread.sleep(1000);
+        } catch (InterruptedException e) {
+            Thread.currentThread().interrupt();
+        }
+
+        screen.close();
+        terminal.close();
+    }
+
 
     public static void main(String[] args) {
         try {
