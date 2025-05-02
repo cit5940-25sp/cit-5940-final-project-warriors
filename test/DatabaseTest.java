@@ -39,4 +39,20 @@ public class DatabaseTest {
 
         assertEquals(2010, Tangled.getReleaseDate());
     }
+
+    @Test
+    public void testGetRandomMovie() {
+        Database database = new Database();
+        database.loadFromCSV("cleaned_imdb_final.csv");
+        Movie movie = database.getRandomMovie();
+        assertNotNull(movie);
+    }
+
+    @Test
+    public void testGetMovieSet() {
+        Database database = new Database();
+        database.loadFromCSV("cleaned_imdb_final.csv");
+        Set<String> movie = database.getMovieNameSet();
+        assertNotNull(movie);
+    }
 }
