@@ -17,7 +17,7 @@ public class DatabaseTest {
         Database database = new Database();
         database.loadFromCSV("cleaned_imdb_final.csv");
 
-        Movie Tangled = database.getMovieByName("Tangled");
+        Movie Tangled = database.getMovieByName("Tangled (2010)");
         Set<String> actor = Tangled.getActors();
         assertTrue(actor.contains("Brad Garrett"));
         assertTrue(actor.contains("Byron Howard"));
@@ -36,5 +36,7 @@ public class DatabaseTest {
         Set<String> genres = Tangled.getGenres();
         assertTrue(genres.contains("Family"));
         assertTrue(genres.contains("Animation"));
+
+        assertEquals(2010, Tangled.getReleaseDate());
     }
 }

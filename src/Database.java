@@ -67,28 +67,30 @@ public class Database {
                 Set<String> genres = parseGenres(genreData);
 
                 // Process release date
-                Date date = null;
+                int releaseYear = 0;
                 if (!releaseDate.isEmpty()) {
                     try {
-                        SimpleDateFormat format = new SimpleDateFormat("yyyy-MM-dd");
-                        date = format.parse(releaseDate);
-                    } catch (ParseException e) {
-                        System.err.println("Failed to parse date for " + title + ": " + e.getMessage());
+                        releaseYear = Integer.parseInt(releaseDate.substring(0, 4));
+                    } catch (NumberFormatException | IndexOutOfBoundsException e) {
+                        System.err.println("Failed to extract year for " + title + ": " + e.getMessage());
                     }
                 }
 
-                moviePeopleMap.put(title, jobMap);
-                movieNames.add(title);
+
+                String titleWithYear = title + " (" + releaseYear + ")";
+
+                moviePeopleMap.put(titleWithYear, jobMap);
+                movieNames.add(titleWithYear);
 
                 // Create movie object for Map
                 Movie movie = new Movie(
-                        title,
-                        date != null ? (int) date.getTime() : 0,
+                        titleWithYear,
+                        releaseYear,
                         genres,
                         directors, actors, writers, cinematographers, composers
                 );
 
-                movieMap.put(title, movie);
+                movieMap.put(titleWithYear, movie);
             }
         } catch (IOException e) {
             System.err.println("Failed to read CSV: " + e.getMessage());
