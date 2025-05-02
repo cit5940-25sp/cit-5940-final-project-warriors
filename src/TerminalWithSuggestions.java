@@ -33,6 +33,7 @@ public class TerminalWithSuggestions {
     private String player2Name = "";
     private boolean gameStarted = false;
     private boolean enteringPlayer1 = true;
+    private boolean shouldExit = false;
 
     public TerminalWithSuggestions() throws IOException {
         terminal = new DefaultTerminalFactory().createTerminal();
@@ -73,7 +74,7 @@ public class TerminalWithSuggestions {
 
         showLandingScreen();
 
-        while (running) {
+        while (running && !shouldExit) {
             KeyStroke keyStroke = screen.pollInput();
             if (keyStroke != null) {
                 if (!gameStarted) {
@@ -82,7 +83,8 @@ public class TerminalWithSuggestions {
                 }
 
                 if (secondsRemaining == 0) {
-                    break;
+                    // Just wait for game over processing
+                    continue;
                 }
 
                 switch (keyStroke.getKeyType()) {
@@ -122,8 +124,13 @@ public class TerminalWithSuggestions {
             }
         }
 
-        // After game over or exit
-        scheduler.shutdown();
+        cleanup();
+    }
+
+    private void cleanup() throws IOException {
+        if (scheduler != null && !scheduler.isShutdown()) {
+            scheduler.shutdown();
+        }
         screen.close();
         terminal.close();
     }
@@ -317,7 +324,7 @@ public class TerminalWithSuggestions {
 
         String gameOverMessage = "Game Over!";
         int gameOverCol = (terminalWidth - gameOverMessage.length()) / 2;
-        String winnerMessage = (roundNumber % 2 == 0 ? player1Name : player2Name) + " Wins!!";
+        String winnerMessage = (roundNumber % 2 != 0 ? player1Name : player2Name) + " Wins!!";
         int winnerCol = (terminalWidth - winnerMessage.length()) / 2;
         printColoredString(winnerCol, terminalHeight / 2 + 1, winnerMessage, TextColor.ANSI.YELLOW_BRIGHT);
         printColoredString(gameOverCol, terminalHeight / 2, gameOverMessage, TextColor.ANSI.RED);
@@ -380,10 +387,8 @@ public class TerminalWithSuggestions {
             Thread.currentThread().interrupt();
         }
 
-        screen.close();
-        terminal.close();
+        shouldExit = true;
     }
-
 
     public static void main(String[] args) {
         try {
