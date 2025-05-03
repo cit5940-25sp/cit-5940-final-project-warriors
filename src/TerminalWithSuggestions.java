@@ -700,10 +700,8 @@ public class TerminalWithSuggestions {
         if ((isPlayer1Turn && player1TimeSabotages > 0) || (!isPlayer1Turn && player2TimeSabotages > 0)) {
             if (isPlayer1Turn) {
                 player1TimeSabotages--;
-                player1TimeSabotages = -1;
             } else {
                 player2TimeSabotages--;
-                player2TimeSabotages = -1;
             }
 
             showPowerupEffect("Time Sabotage Activated! Opponent's next turn will be shorter.", TextColor.ANSI.YELLOW);
