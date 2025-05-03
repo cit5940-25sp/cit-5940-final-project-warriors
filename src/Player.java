@@ -5,18 +5,17 @@ import java.util.Set;
 
 public class Player {
     private String username;
-    private Map<String, Integer> connections;
-    private Set<Movie> correctGuesses;
-    private Set<Movie> incorrectGuesses;
+    private Map<String, Integer> connections = new HashMap<>();;
+    private Set<Movie> correctGuesses = new HashSet<>();;
+    private Set<Movie> incorrectGuesses = new HashSet<>();
 
     /**
      * Initialize a new Player
      */
+    public Player() {};
+
     public Player(String username) {
         this.username = username;
-        this.connections = new HashMap<>();
-        this.correctGuesses = new HashSet<>();
-        this.incorrectGuesses = new HashSet<>();
     }
 
     /**
@@ -26,6 +25,12 @@ public class Player {
     public String getUsername() {
         return username;
     }
+
+    /**
+     * Sets the username of the player
+     * @param username
+     */
+    public void setUsername(String username) {this.username = username;}
 
     /**
      *

@@ -2,28 +2,48 @@ import java.util.*;
 
 public class MovieGameModel implements IObservable {
 
-    private Player player1;
-    private Player player2;
+    private String player1Name = "";
+    private String player2Name = "";
+    private boolean enteringPlayer1 = true;
+
+    private Player player1 = new Player();
+    private Player player2 = new Player();
     private Player currentPlayer;
-    private Deque<Movie> lastFiveMovies;
-    private Map<Movie, Set<String>> lastFiveConnections;
-    private Set<Movie> allMovies;
-    private List<IObserver> observers;
+    private Deque<Movie> lastFiveMovies = new ArrayDeque<>(5);
+    private Map<Movie, Set<String>> lastFiveConnections = new HashMap<>(5);
+    private Set<Movie> allMovies = new HashSet<>();
+    private List<IObserver> observers = new ArrayList<>();
     private boolean hasChanged;
+
+    private List<String> suggestions = new ArrayList<>();
+    private int suggestionIndex = 0;
+    private List<String> suggestionGenres = new ArrayList<>();
+    List<String> dictionary = new ArrayList<>();
+
+    private Deque<String> movieHistory = new ArrayDeque<>();
+    private Deque<String> movieGenres = new ArrayDeque<>();
+    private List<String> connections = new ArrayList<>();
+    private List<Boolean> connectionOwners = new ArrayList<>(); // true for Player 1, false for Player 2
+
+    private int secondsRemaining = 30;
+
+    private boolean gameStarted = false;
+    private int roundNumber = 0;
+
+    private int player1Score = 0;
+    private int player2Score = 0;
+
+    // Power-up system
+    private int player1TimeBoosts = 2;  // Player 1 has 2 time boost power-ups
+    private int player2TimeBoosts = 2;  // Player 2 has 2 time boost power-ups
+    private int player1TimeSabotages = 1;  // Player 1 has 1 time sabotage power-up
+    private int player2TimeSabotages = 1;  // Player 2 has 1 time sabotage power-up
+
 
     /**
      * Initialize a new GameState
-     * @param username1
-     * @param username2
      */
-    public MovieGameModel(String username1, String username2, Movie startingMovie) {
-        this.player1 = new Player(username1);
-        this.player2 = new Player(username2);
-        this.lastFiveMovies = new ArrayDeque<>(5);
-        this.lastFiveConnections = new HashMap<>(5);
-        this.allMovies = new HashSet<>();
-        this.observers = new ArrayList<>();
-
+    public MovieGameModel(Movie startingMovie, Set<String> movieNames) {
         // initialize state with starting movie
         this.lastFiveMovies.add(startingMovie);
         this.lastFiveConnections.put(startingMovie, null);
@@ -33,6 +53,69 @@ public class MovieGameModel implements IObservable {
         Random rand = new Random();
         int binary = rand.nextInt(2);  // returns 0 or 1
         this.currentPlayer = (binary == 0) ? player1 : player2;
+
+        // create dictionary of movie titles
+        List<String> titles = new ArrayList<>(movieNames);
+        this.dictionary = new ArrayList<>();
+        for (String movieName : titles) {
+            movieName = movieName.toLowerCase();
+            this.dictionary.add(movieName);
+        }
+    }
+
+    public boolean getEnteringPlayer1() {
+        return this.enteringPlayer1;
+    }
+
+    public String getPlayer1Name() {
+        return this.player1Name;
+    }
+
+    public String getPlayer2Name() {
+        return this.player2Name;
+    }
+
+    public void updatePlayer1Name(char charc) {
+        this.player1Name += charc;
+    }
+
+    public void updatePlayer2Name(char charc) {
+        this.player2Name += charc;
+    }
+
+    public void setPlayer1Name(String name) {
+        this.player1Name = name;
+    }
+
+    public void setPlayer2Name(String name) {
+        this.player2Name = name;
+    }
+
+
+    public void setEnteringPlayer1(boolean bool) {
+        this.enteringPlayer1 = bool;
+    }
+
+    public void updateSuggestions(StringBuilder currentInput) {
+        suggestions.clear();
+        suggestionGenres.clear();
+        String prefix = currentInput.toString();
+        if (!prefix.isEmpty()) {
+            int count = 0;
+            for (String word : dictionary) {
+                if (word.startsWith(prefix.toLowerCase()) && count < 5) {
+                    suggestions.add(word);
+                    String genre = "genre";
+                    suggestionGenres.add(genre);
+                    count++;
+                }
+            }
+        }
+        suggestionIndex = 0;
+    }
+
+    public void clearSuggestions() {
+        this.suggestions.clear();
     }
 
     /**
@@ -178,4 +261,241 @@ public class MovieGameModel implements IObservable {
         }
     }
 
+    public List<String> getSuggestions() {
+        return suggestions;
+    }
+
+    public void setSuggestions(List<String> suggestions) {
+        this.suggestions = suggestions;
+    }
+
+    public int getSuggestionIndex() {
+        return suggestionIndex;
+    }
+
+    public void setSuggestionIndex(int suggestionIndex) {
+        this.suggestionIndex = suggestionIndex;
+    }
+
+    public int getSecondsRemaining() {
+        return secondsRemaining;
+    }
+
+    public void setSecondsRemaining(int secondsRemaining) {
+        this.secondsRemaining = secondsRemaining;
+    }
+
+    public void decrementSecondsRemaining() {
+        this.secondsRemaining--;
+    }
+
+    public void updateSecondsRemaining(int offset) {
+        this.secondsRemaining += offset;
+    }
+
+    public boolean isGameStarted() {
+        return gameStarted;
+    }
+
+    public void setGameStarted(boolean gameStarted) {
+        this.gameStarted = gameStarted;
+    }
+
+    public Deque<String> getMovieHistory() {
+        return movieHistory;
+    }
+
+    public void setMovieHistory(Deque<String> movieHistory) {
+        this.movieHistory = movieHistory;
+    }
+
+    public void updateMovieHistory(String selectedTitle) {
+        movieHistory.addFirst(selectedTitle);
+        if (movieHistory.size() > 5) {
+            movieHistory.removeLast();
+        }
+    }
+
+    public void clearMovieHistory() {
+        this.movieHistory.clear();
+    }
+
+    public int getRoundNumber() {
+        return roundNumber;
+    }
+
+    public void setRoundNumber(int roundNumber) {
+        this.roundNumber = roundNumber;
+    }
+
+    public void incrementRoundNumber() {
+        this.roundNumber++;
+    }
+
+    public List<String> getSuggestionGenres() {
+        return suggestionGenres;
+    }
+
+    public void setSuggestionGenres(List<String> suggestionGenres) {
+        this.suggestionGenres = suggestionGenres;
+    }
+
+    public void clearSuggestionGenres() {
+        this.suggestionGenres.clear();
+    }
+
+    public Deque<String> getMovieGenres() {
+        return movieGenres;
+    }
+
+    public void setMovieGenres(Deque<String> movieGenres) {
+        this.movieGenres = movieGenres;
+    }
+
+    public void clearMovieGenres() {
+        this.movieGenres.clear();
+    }
+
+    public List<String> getConnections() {
+        return connections;
+    }
+
+    public void setConnections(List<String> connections) {
+        this.connections = connections;
+    }
+
+    public void clearConnections() {
+        this.connections.clear();
+    }
+
+    public void addToConnections(int index, String phrase) {
+        this.connections.add(index, phrase);
+    }
+
+    public List<Boolean> getConnectionOwners() {
+        return connectionOwners;
+    }
+
+    public void setConnectionOwners(List<Boolean> connectionOwners) {
+        this.connectionOwners = connectionOwners;
+    }
+
+    public void addToConnectionOwners(int index, boolean bool) {
+        this.connectionOwners.add(index, bool);
+    }
+
+    public void clearConnectionOwners() {
+        this.connectionOwners.clear();
+    }
+
+    public int getPlayer1Score() {
+        return player1Score;
+    }
+
+    public void setPlayer1Score(int player1Score) {
+        this.player1Score = player1Score;
+    }
+
+    public void incrementPlayer1Score() {
+        this.player1Score++;
+    }
+
+    public int getPlayer2Score() {
+        return player2Score;
+    }
+
+    public void setPlayer2Score(int player2Score) {
+        this.player2Score = player2Score;
+    }
+
+    public void incrementPlayer2Score() {
+        this.player2Score++;
+    }
+
+    public void updateMovieGenres(String genre) {
+        this.movieGenres.addFirst(genre);
+    }
+
+    public int getPlayer1TimeBoosts() {
+        return player1TimeBoosts;
+    }
+
+    public void setPlayer1TimeBoosts(int player1TimeBoosts) {
+        this.player1TimeBoosts = player1TimeBoosts;
+    }
+
+    public void decrementPlayer1TimeBoosts() {
+        this.player1TimeBoosts--;
+    }
+
+    public int getPlayer2TimeBoosts() {
+        return player2TimeBoosts;
+    }
+
+    public void setPlayer2TimeBoosts(int player2TimeBoosts) {
+        this.player2TimeBoosts = player2TimeBoosts;
+    }
+
+    public void decrementPlayer2TimeBoosts() {
+        this.player2TimeBoosts--;
+    }
+
+    public int getPlayer1TimeSabotages() {
+        return player1TimeSabotages;
+    }
+
+    public void setPlayer1TimeSabotages(int player1TimeSabotages) {
+        this.player1TimeSabotages = player1TimeSabotages;
+    }
+
+    public int getPlayer2TimeSabotages() {
+        return player2TimeSabotages;
+    }
+
+    public void setPlayer2TimeSabotages(int player2TimeSabotages) {
+        this.player2TimeSabotages = player2TimeSabotages;
+    }
+
+    public void rotate() {
+        if (movieHistory.size() > 5) {
+            movieHistory.removeLast();
+            movieGenres.removeLast();
+            if (connections.size() > 5 - 1) {
+                connections.removeLast();
+                connectionOwners.removeLast();
+            }
+        }
+    }
+
+    public void checkTimeSabotage() {
+        boolean nextPlayerIsSabotaged = false;
+        if (roundNumber % 2 == 0) {
+            if (player1TimeSabotages < 0) {
+                nextPlayerIsSabotaged = true;
+                player1TimeSabotages++;
+            }
+        } else {
+            if (player2TimeSabotages < 0) {
+                nextPlayerIsSabotaged = true;
+                player2TimeSabotages++;
+            }
+        }
+    }
+
+    public void resetModel() {
+        movieHistory.clear();
+        movieGenres.clear();
+        connections.clear();
+        connectionOwners.clear();
+        suggestions.clear();
+        suggestionGenres.clear();
+        roundNumber = 0;
+        secondsRemaining = 30;
+        gameStarted = false;
+        enteringPlayer1 = true;
+        player1Name = "";
+        player2Name = "";
+        player1Score = 0;
+        player2Score = 0;
+    }
 }
