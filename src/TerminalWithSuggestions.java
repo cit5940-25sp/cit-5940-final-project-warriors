@@ -29,15 +29,15 @@ public class TerminalWithSuggestions {
     private int roundNumber = 0;
 
     // Power-up system
-    private int player1TimeBoosts = 2;  // Player 1 has 2 time boost power-ups
-    private int player2TimeBoosts = 2;  // Player 2 has 2 time boost power-ups
-    private int player1TimeSabotages = 1;  // Player 1 has 1 time sabotage power-up
-    private int player2TimeSabotages = 1;  // Player 2 has 1 time sabotage power-up
+    private int player1TimeBoosts = 2;
+    private int player2TimeBoosts = 2;
+    private int player1TimeSabotages = 1;
+    private int player2TimeSabotages = 1;
 
     private Deque<String> movieHistory = new ArrayDeque<>();
     private Deque<String> movieGenres = new ArrayDeque<>();
     private List<String> connections = new ArrayList<>();
-    private List<Boolean> connectionOwners = new ArrayList<>(); // true for Player 1, false for Player 2
+    private List<Boolean> connectionOwners = new ArrayList<>();
     private static final int MAX_HISTORY_SIZE = 5;
 
     private String player1Name = "";
@@ -423,11 +423,11 @@ public class TerminalWithSuggestions {
         int timerCol = size.getColumns() - timerText.length() - 5;
         printColoredString(timerCol, 10, timerText, currentTimerColor);
 
-        // Draw movie chain with connections and genres
+
         int startRow = 14;
         int centerCol = size.getColumns() / 2;
 
-        //drawBox(2, startRow - 2, size.getColumns() - 3, size.getRows() - 7);
+
         printColoredString(4, startRow, "Movie Chain:", TextColor.ANSI.WHITE);
 
         if (!movieHistory.isEmpty()) {
@@ -705,12 +705,10 @@ public class TerminalWithSuggestions {
 
         if ((isPlayer1Turn && player1TimeSabotages > 0) || (!isPlayer1Turn && player2TimeSabotages > 0)) {
             if (isPlayer1Turn) {
-                player1TimeSabotages--; // Decrement available sabotages
-                // Set flag for opponent's next turn
+                player1TimeSabotages--;
                 player2IsSabotaged = true;
             } else {
-                player2TimeSabotages--; // Decrement available sabotages
-                // Set flag for opponent's next turn
+                player2TimeSabotages--;
                 player1IsSabotaged = true;
             }
 
