@@ -335,14 +335,7 @@ public class TerminalWithSuggestions {
 
     // need to change to work for our actual connections
     private String generateConnectionPhrase() {
-        String[] phrases = {
-                "stars in", "directs", "sequel to", "prequel to", "same genre as",
-                "released after", "features", "inspired by", "parodies", "remakes",
-                "same director as", "same actor as", "references", "similar to", "adapts",
-                "continues from", "reimagines", "responds to", "influenced by", "connected with"
-        };
-        Random random = new Random();
-        return phrases[random.nextInt(phrases.length)];
+        return "Connection";
     }
 
     private void updateSuggestions() {
