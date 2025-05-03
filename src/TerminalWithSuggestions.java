@@ -47,6 +47,8 @@ public class TerminalWithSuggestions {
     private boolean gameStarted = false;
     private boolean enteringPlayer1 = true;
     private boolean shouldExit = false;
+    private boolean player1IsSabotaged = false;
+    private boolean player2IsSabotaged = false;
 
     // Colors
     private static final TextColor BACKGROUND_COLOR = TextColor.ANSI.BLACK;
@@ -312,16 +314,17 @@ public class TerminalWithSuggestions {
             }
         }
 
+        // Check if the next player is sabotaged
         boolean nextPlayerIsSabotaged = false;
-        if (roundNumber % 2 == 0) {
-            if (player1TimeSabotages < 0) {
+        if (roundNumber % 2 == 0) { // Player 1's turn just ended, checking if Player 2 is sabotaged
+            if (player2IsSabotaged) {
                 nextPlayerIsSabotaged = true;
-                player1TimeSabotages++;
+                player2IsSabotaged = false; // Reset the flag
             }
-        } else {
-            if (player2TimeSabotages < 0) {
+        } else { // Player 2's turn just ended, checking if Player 1 is sabotaged
+            if (player1IsSabotaged) {
                 nextPlayerIsSabotaged = true;
-                player2TimeSabotages++;
+                player1IsSabotaged = false; // Reset the flag
             }
         }
 
@@ -397,12 +400,15 @@ public class TerminalWithSuggestions {
         printColoredString(4, 10, roundInfo, TextColor.ANSI.WHITE);
         printColoredString(4, 11, turnInfo, (roundNumber % 2 == 0 ? PLAYER1_COLOR : PLAYER2_COLOR));
 
-        // Status effects display
         boolean nextPlayerWillBeSabotaged = false;
-        if (roundNumber % 2 == 0 && player1TimeSabotages < 0) {
-            nextPlayerWillBeSabotaged = true;
-        } else if (roundNumber % 2 != 0 && player2TimeSabotages < 0) {
-            nextPlayerWillBeSabotaged = true;
+        if (roundNumber % 2 == 0) { // Player 1's turn now
+            if (player2IsSabotaged) { // Player 2 will be sabotaged next
+                nextPlayerWillBeSabotaged = true;
+            }
+        } else { // Player 2's turn now
+            if (player1IsSabotaged) { // Player 1 will be sabotaged next
+                nextPlayerWillBeSabotaged = true;
+            }
         }
 
         if (nextPlayerWillBeSabotaged) {
@@ -699,9 +705,13 @@ public class TerminalWithSuggestions {
 
         if ((isPlayer1Turn && player1TimeSabotages > 0) || (!isPlayer1Turn && player2TimeSabotages > 0)) {
             if (isPlayer1Turn) {
-                player1TimeSabotages--;
+                player1TimeSabotages--; // Decrement available sabotages
+                // Set flag for opponent's next turn
+                player2IsSabotaged = true;
             } else {
-                player2TimeSabotages--;
+                player2TimeSabotages--; // Decrement available sabotages
+                // Set flag for opponent's next turn
+                player1IsSabotaged = true;
             }
 
             showPowerupEffect("Time Sabotage Activated! Opponent's next turn will be shorter.", TextColor.ANSI.YELLOW);
