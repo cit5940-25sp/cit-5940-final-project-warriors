@@ -214,7 +214,7 @@ public class TerminalWithSuggestions {
 
         drawBox(0, 0, size.getColumns() - 1, size.getRows() - 1);
 
-        String title = "🎬 MOVIE BATTLE 🎬";
+        String title = "MOVIE BATTLE";
         int titleCol = (size.getColumns() - title.length()) / 2;
         printColoredString(titleCol, 3, title, TITLE_COLOR);
 
