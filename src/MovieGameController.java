@@ -130,9 +130,9 @@ public class MovieGameController{
     }
 
     private void handleCharacter(char c) throws IOException {
-        if (c == '1') {
+        if (c == '[') {
             activateTimeBoost();
-        } else if (c == '2') {
+        } else if (c == ']') {
             activateTimeSabotage();
         } else {
             currentInput.insert(view.getCursorPosition(), c);
@@ -225,11 +225,10 @@ public class MovieGameController{
                 (!isPlayer1Turn && model.getPlayer2TimeSabotages() > 0)) {
             if (isPlayer1Turn) {
                 model.setPlayer1TimeSabotages(model.getPlayer1TimeSabotages() - 1);
-                model.setPlayer2TimeSabotaged(true); // flag to trigger sabotage next round
             } else {
                 model.setPlayer2TimeSabotages(model.getPlayer2TimeSabotages() - 1);
-                model.setPlayer1TimeSabotaged(true);
             }
+            model.setNextPlayerSabotaged(true);
             view.displayPowerUp("Time Sabotage", true);
             view.updateScreen(this.currentInput);
         } else {

@@ -35,8 +35,9 @@ public class MovieGameModel implements IObservable {
     private int player2TimeBoosts = 2;  // Player 2 has 2 time boost power-ups
     private int player1TimeSabotages = 1;  // Player 1 has 1 time sabotage power-up
     private int player2TimeSabotages = 1;  // Player 2 has 1 time sabotage power-up
-    private boolean player1TimeSabotaged = false;
-    private boolean player2TimeSabotaged = false;
+    private boolean nextPlayerSabotaged = false;
+//    private boolean player1TimeSabotaged = false;
+//    private boolean player2TimeSabotaged = false;
 
 
     /**
@@ -91,23 +92,15 @@ public class MovieGameModel implements IObservable {
         return this.player2Name;
     }
 
-    public void updatePlayer1Name(char charc) {
-        this.player1Name += charc;
-    }
-
-    public void updatePlayer2Name(char charc) {
-        this.player2Name += charc;
-    }
-
     public void setEnteringPlayer1(boolean bool) {
         this.enteringPlayer1 = bool;
     }
 
     public void incrementPlayerNames(char charc) {
         if (enteringPlayer1) {
-            updatePlayer1Name(charc);
+            player1Name += charc;
         } else {
-            updatePlayer2Name(charc);
+            player2Name += charc;
         }
     }
 
@@ -389,22 +382,11 @@ public class MovieGameModel implements IObservable {
     }
 
     public void updateToNextRound() {
-        boolean nextPlayerIsSabotaged = false;
-        if (isPlayer1Turn()) { // Player 1's turn
-            if (player1TimeSabotaged) {
-                nextPlayerIsSabotaged = true;
-                player1TimeSabotaged = false; // reset flag after using
-            }
-        } else { // Player 2's turn
-            if (player2TimeSabotaged) {
-                nextPlayerIsSabotaged = true;
-                player2TimeSabotaged = false;
-            }
-        }
         // Debugging output: Log sabotage state
-        System.out.println("Next player sabotaged: " + nextPlayerIsSabotaged);
+        System.out.println("Next player sabotaged: " + nextPlayerSabotaged);
 
-        secondsRemaining = nextPlayerIsSabotaged ? 20 : 30;
+        secondsRemaining = nextPlayerSabotaged ? 20 : 30;
+        nextPlayerSabotaged = false;
 
         // Debugging output: Log the seconds remaining
         System.out.println("Seconds remaining after sabotage: " + secondsRemaining);
@@ -454,19 +436,7 @@ public class MovieGameModel implements IObservable {
         allMovies.add(startingMovie);
     }
 
-    public boolean isPlayer1TimeSabotaged() {
-        return player1TimeSabotaged;
-    }
-
-    public void setPlayer1TimeSabotaged(boolean value) {
-        this.player1TimeSabotaged = value;
-    }
-
-    public boolean isPlayer2TimeSabotaged() {
-        return player2TimeSabotaged;
-    }
-
-    public void setPlayer2TimeSabotaged(boolean value) {
-        this.player2TimeSabotaged = value;
+    public void setNextPlayerSabotaged(boolean nextPlayerSabotaged) {
+        this.nextPlayerSabotaged = nextPlayerSabotaged;
     }
 }

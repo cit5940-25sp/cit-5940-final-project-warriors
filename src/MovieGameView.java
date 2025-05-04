@@ -45,15 +45,6 @@ public class MovieGameView implements IObserver {
         this.screen.startScreen();
     }
 
-
-    public void clearScreen() {
-        screen.clear();
-    }
-
-    public void screenRefresh() throws IOException {
-        screen.refresh();
-    }
-
     public KeyStroke screenPollInput() throws IOException {
         return screen.pollInput();
     }
@@ -102,8 +93,8 @@ public class MovieGameView implements IObserver {
                 "3. You have 30 seconds to make your move",
                 "4. If time runs out, the other player wins",
                 "5. Use arrow keys to navigate suggestions and Enter to select",
-                "6. Power-ups: Press [1] to add 15 seconds to your time",
-                "7. Power-ups: Press [2] to reduce opponent's time next turn"
+                "6. Power-ups: Press '[' to add 15 seconds to your time",
+                "7. Power-ups: Press ']' to reduce opponent's time next turn"
         };
 
         int instructionCol = (size.getColumns() / 2) - 25;
@@ -133,10 +124,6 @@ public class MovieGameView implements IObserver {
 
     private TerminalSize getSize() {
         return screen.getTerminalSize();
-    }
-
-    private int getCenterColumn() {
-        return screen.getTerminalSize().getColumns() / 2;
     }
 
     public void updateScreen(StringBuilder currentInput) throws IOException {
@@ -476,7 +463,6 @@ public class MovieGameView implements IObserver {
         }
     }
 
-
     public int getCursorPosition() {
         return this.cursorPosition;
     }
@@ -498,38 +484,4 @@ public class MovieGameView implements IObserver {
 
     }
 
-
-//    /**
-//     * Update the GameView based on the event that
-//     * has occurred
-//     */
-//    @Override
-//    public void update(String event) {
-//
-//        switch (event) {
-//            case "GAME_START":
-//                // get new display of game
-//                break;
-//            case "VALID_MOVE":
-//                // update to reflect move made
-//                break;
-//            case "INVALID_MOVE":
-//                // show error message
-//                break;
-//            case "GAME_END":
-//                // show display of end screen
-//                break;
-//            default:
-//                // update the entire view
-//                break;
-//        }
-//    }
-
-//    /**
-//     * Gets the user's guess for a round of gameplay. Implements AutoComplete.
-//     * @return String name of guess
-//     */
-//    public static String getUserGuess() {
-//        return "";
-//    }
 }
