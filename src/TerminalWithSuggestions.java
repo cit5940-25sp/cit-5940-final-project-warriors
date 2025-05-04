@@ -29,15 +29,15 @@ public class TerminalWithSuggestions {
     private int roundNumber = 0;
 
     // Power-up system
-    private int player1TimeBoosts = 2;  // Player 1 has 2 time boost power-ups
-    private int player2TimeBoosts = 2;  // Player 2 has 2 time boost power-ups
-    private int player1TimeSabotages = 1;  // Player 1 has 1 time sabotage power-up
-    private int player2TimeSabotages = 1;  // Player 2 has 1 time sabotage power-up
+    private int player1TimeBoosts = 2;
+    private int player2TimeBoosts = 2;
+    private int player1TimeSabotages = 1;
+    private int player2TimeSabotages = 1;
 
     private Deque<String> movieHistory = new ArrayDeque<>();
     private Deque<String> movieGenres = new ArrayDeque<>();
     private List<String> connections = new ArrayList<>();
-    private List<Boolean> connectionOwners = new ArrayList<>(); // true for Player 1, false for Player 2
+    private List<Boolean> connectionOwners = new ArrayList<>();
     private static final int MAX_HISTORY_SIZE = 5;
 
     private String player1Name = "";
@@ -47,6 +47,8 @@ public class TerminalWithSuggestions {
     private boolean gameStarted = false;
     private boolean enteringPlayer1 = true;
     private boolean shouldExit = false;
+    private boolean player1IsSabotaged = false;
+    private boolean player2IsSabotaged = false;
 
     // Colors
     private static final TextColor BACKGROUND_COLOR = TextColor.ANSI.BLACK;
@@ -212,7 +214,7 @@ public class TerminalWithSuggestions {
 
         drawBox(0, 0, size.getColumns() - 1, size.getRows() - 1);
 
-        String title = "🎬 MOVIE BATTLE 🎬";
+        String title = "MOVIE BATTLE";
         int titleCol = (size.getColumns() - title.length()) / 2;
         printColoredString(titleCol, 3, title, TITLE_COLOR);
 
@@ -312,16 +314,17 @@ public class TerminalWithSuggestions {
             }
         }
 
+        // Check if the next player is sabotaged
         boolean nextPlayerIsSabotaged = false;
-        if (roundNumber % 2 == 0) {
-            if (player1TimeSabotages < 0) {
+        if (roundNumber % 2 == 0) { // Player 1's turn just ended, checking if Player 2 is sabotaged
+            if (player2IsSabotaged) {
                 nextPlayerIsSabotaged = true;
-                player1TimeSabotages++;
+                player2IsSabotaged = false; // Reset the flag
             }
-        } else {
-            if (player2TimeSabotages < 0) {
+        } else { // Player 2's turn just ended, checking if Player 1 is sabotaged
+            if (player1IsSabotaged) {
                 nextPlayerIsSabotaged = true;
-                player2TimeSabotages++;
+                player1IsSabotaged = false; // Reset the flag
             }
         }
 
@@ -397,12 +400,15 @@ public class TerminalWithSuggestions {
         printColoredString(4, 10, roundInfo, TextColor.ANSI.WHITE);
         printColoredString(4, 11, turnInfo, (roundNumber % 2 == 0 ? PLAYER1_COLOR : PLAYER2_COLOR));
 
-        // Status effects display
         boolean nextPlayerWillBeSabotaged = false;
-        if (roundNumber % 2 == 0 && player1TimeSabotages < 0) {
-            nextPlayerWillBeSabotaged = true;
-        } else if (roundNumber % 2 != 0 && player2TimeSabotages < 0) {
-            nextPlayerWillBeSabotaged = true;
+        if (roundNumber % 2 == 0) { // Player 1's turn now
+            if (player2IsSabotaged) { // Player 2 will be sabotaged next
+                nextPlayerWillBeSabotaged = true;
+            }
+        } else { // Player 2's turn now
+            if (player1IsSabotaged) { // Player 1 will be sabotaged next
+                nextPlayerWillBeSabotaged = true;
+            }
         }
 
         if (nextPlayerWillBeSabotaged) {
@@ -417,11 +423,11 @@ public class TerminalWithSuggestions {
         int timerCol = size.getColumns() - timerText.length() - 5;
         printColoredString(timerCol, 10, timerText, currentTimerColor);
 
-        // Draw movie chain with connections and genres
+
         int startRow = 14;
         int centerCol = size.getColumns() / 2;
 
-        //drawBox(2, startRow - 2, size.getColumns() - 3, size.getRows() - 7);
+
         printColoredString(4, startRow, "Movie Chain:", TextColor.ANSI.WHITE);
 
         if (!movieHistory.isEmpty()) {
@@ -700,10 +706,10 @@ public class TerminalWithSuggestions {
         if ((isPlayer1Turn && player1TimeSabotages > 0) || (!isPlayer1Turn && player2TimeSabotages > 0)) {
             if (isPlayer1Turn) {
                 player1TimeSabotages--;
-                player1TimeSabotages = -1;
+                player2IsSabotaged = true;
             } else {
                 player2TimeSabotages--;
-                player2TimeSabotages = -1;
+                player1IsSabotaged = true;
             }
 
             showPowerupEffect("Time Sabotage Activated! Opponent's next turn will be shorter.", TextColor.ANSI.YELLOW);
