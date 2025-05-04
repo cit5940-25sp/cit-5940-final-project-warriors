@@ -20,7 +20,7 @@ public class MovieGameModel implements IObservable {
     private List<String> suggestions = new ArrayList<>();
     private int suggestionIndex = 0;
     private List<String> suggestionGenres = new ArrayList<>();
-    ArrayList<String> dictionary = new ArrayList<>();
+    ArrayList<String> dictionary;
 
     private int secondsRemaining = 30;
 
@@ -28,12 +28,11 @@ public class MovieGameModel implements IObservable {
     private int roundNumber = 0;
 
     // Power-up system
-    private int player1TimeBoosts = 2;  // Player 1 has 2 time boost power-ups
-    private int player2TimeBoosts = 2;  // Player 2 has 2 time boost power-ups
-    private int player1TimeSabotages = 1;  // Player 1 has 1 time sabotage power-up
-    private int player2TimeSabotages = 1;  // Player 2 has 1 time sabotage power-up
+    private int player1TimeBoosts = 2;
+    private int player2TimeBoosts = 2;
+    private int player1TimeSabotages = 1;
+    private int player2TimeSabotages = 1;
     private boolean nextPlayerSabotaged = false;
-
 
     /**
      * Initialize a new GameState
@@ -363,14 +362,16 @@ public class MovieGameModel implements IObservable {
         this.player2TimeSabotages = player2TimeSabotages;
     }
 
+    public void setNextPlayerSabotaged(boolean nextPlayerSabotaged) {
+        this.nextPlayerSabotaged = nextPlayerSabotaged;
+    }
+
     public void updateToNextRound() {
-        // Debugging output: Log sabotage state
         System.out.println("Next player sabotaged: " + nextPlayerSabotaged);
 
         secondsRemaining = nextPlayerSabotaged ? 20 : 30;
         nextPlayerSabotaged = false;
 
-        // Debugging output: Log the seconds remaining
         System.out.println("Seconds remaining after sabotage: " + secondsRemaining);
 
         roundNumber++;
@@ -418,7 +419,5 @@ public class MovieGameModel implements IObservable {
         allMovies.add(startingMovie);
     }
 
-    public void setNextPlayerSabotaged(boolean nextPlayerSabotaged) {
-        this.nextPlayerSabotaged = nextPlayerSabotaged;
-    }
+
 }
