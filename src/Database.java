@@ -192,10 +192,11 @@ public class Database {
      * @return Movie
      */
     public Movie getRandomMovie() {
-        Set<String> keySet = movieMap.keySet();
-        int randomIndex = new Random().nextInt(keySet.size());
-        String randomKey = (String) keySet.toArray()[randomIndex];
-        return movieMap.get(randomKey);
+//        Set<String> keySet = movieMap.keySet();
+//        int randomIndex = new Random().nextInt(keySet.size());
+//        String randomKey = (String) keySet.toArray()[randomIndex];
+//        return movieMap.get(randomKey);
+        return movieMap.get("Titanic (1997)");
     }
 
     /**
@@ -212,8 +213,15 @@ public class Database {
      * @return Movie class object
      */
     public Movie getMovieByName(String name) {
-        return movieMap.get(name);
+        for (String key : movieMap.keySet()) {
+            if (key.equalsIgnoreCase(name) || key.toLowerCase().startsWith(name.toLowerCase() + " (")) {
+                return movieMap.get(key);
+            }
+        }
+        System.err.println("Movie not found in database.");
+        return null;
     }
+
 
 //    /**
 //     * @return the type of connection between two movies. Return NULL

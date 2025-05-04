@@ -127,13 +127,25 @@ public class MovieGameView implements IObserver {
         screen.refresh();
     }
 
+    private String formatGenreSet(Set<String> genres) {
+        return String.join(", ", genres);
+    }
+
+    private TerminalSize getSize() {
+        return screen.getTerminalSize();
+    }
+
+    private int getCenterColumn() {
+        return screen.getTerminalSize().getColumns() / 2;
+    }
+
     public void updateScreen(StringBuilder currentInput) throws IOException {
         if (model.getSecondsRemaining() == 0 && model.isGameStarted()) {
             return;
         }
 
         screen.clear();
-        TerminalSize size = screen.getTerminalSize();
+        TerminalSize size = getSize();
 
         drawBox(0, 0, size.getColumns() - 1, size.getRows() - 1);
 
@@ -195,29 +207,42 @@ public class MovieGameView implements IObserver {
         //drawBox(2, startRow - 2, size.getColumns() - 3, size.getRows() - 7);
         printColoredString(4, startRow, "Movie Chain:", TextColor.ANSI.WHITE);
 
-        if (!model.getMovieHistory().isEmpty()) {
-            Iterator<String> movieIter = model.getMovieHistory().iterator();
-            Iterator<String> genreIter = model.getMovieGenres().iterator();
+        if (!model.getLastFiveMovies().isEmpty()) {
+            Iterator<Movie> movieIter = model.getLastFiveMovies().iterator();
 
-            String firstMovie = movieIter.next();
-            String firstGenre = genreIter.next();
-            String titleCap = capitalizeTitle(firstMovie);
+            Movie firstMovie = movieIter.next();  // First movie (no connection yet)
+            String titleCap = capitalizeTitle(firstMovie.getTitle());
+            String firstGenre = formatGenreSet(firstMovie.getGenres());
 
             int col = centerCol - titleCap.length() / 2;
             printString(col, startRow, titleCap);
+
             String genreText = "[" + firstGenre + "]";
             int genreCol = centerCol - genreText.length() / 2;
             printColoredString(genreCol, startRow + 1, genreText, GENRE_COLOR);
 
             int k = 1;
-            int connIndex = 0;
-            while (movieIter.hasNext() && connIndex < model.getConnections().size()) {
-                for (int i = 0; i < 2; i++) {
-                    printColoredString(centerCol, startRow + 2 + (k-1)*4 + i, "│", CONNECTION_COLOR);
+            while (movieIter.hasNext()) {
+                Movie currentMovie = movieIter.next();  // next movie
+                Player currentPlayer = model.getLastFivePlayers().get(currentMovie.getTitle());
+                Set<String> currentConnections = model.getLastFiveConnections().get(currentMovie.getTitle());
+
+                if (currentConnections == null) {
+                    System.out.println("No currentConnections found for: " + currentMovie.getTitle());
+                    currentConnections = new HashSet<>();
                 }
 
-                String connection = model.getConnections().get(connIndex);
-                boolean isPlayer1Connection = model.getConnectionOwners().get(connIndex);
+                for (int i = 0; i < 2; i++) {
+                    printColoredString(centerCol, startRow + 2 + (k - 1) * 4 + i, "│", CONNECTION_COLOR);
+                }
+
+                String connection = "";
+                for (String person : currentConnections) {
+                    int hit = currentPlayer.getConnectionOfPerson(person);
+                    connection += (person + "(" + hit + ")");
+                }
+
+                boolean isPlayer1Connection = currentPlayer.getUsername().equals(model.getPlayer1Name());
                 TextColor connectionTextColor = isPlayer1Connection ? PLAYER1_COLOR : PLAYER2_COLOR;
                 String arrowLeft = "← ";
                 String arrowRight = " →";
@@ -225,25 +250,25 @@ public class MovieGameView implements IObserver {
                 if (isPlayer1Connection) {
                     String connectionText = connection + arrowLeft;
                     int connectionLeftPos = centerCol - connectionText.length() - 1;
-                    printColoredString(connectionLeftPos, startRow + 3 + (k-1)*4, connectionText, connectionTextColor);
+                    printColoredString(connectionLeftPos, startRow + 3 + (k - 1) * 4, connectionText, connectionTextColor);
                 } else {
                     String connectionText = arrowRight + connection;
                     int connectionRightPos = centerCol + 1;
-                    printColoredString(connectionRightPos, startRow + 3 + (k-1)*4, connectionText, connectionTextColor);
+                    printColoredString(connectionRightPos, startRow + 3 + (k - 1) * 4, connectionText, connectionTextColor);
                 }
 
-                String nextMovie = movieIter.next();
-                String nextGenre = genreIter.next();
-                String nextTitleCap = capitalizeTitle(nextMovie);
+                // Display current movie info
+                String nextTitleCap = capitalizeTitle(currentMovie.getTitle());
+                String nextGenreText = "[" + formatGenreSet(currentMovie.getGenres()) + "]";
+
                 int nextCol = centerCol - nextTitleCap.length() / 2;
-                printString(nextCol, startRow + 4 + (k-1)*4, nextTitleCap);
+                printString(nextCol, startRow + 4 + (k - 1) * 4, nextTitleCap);
 
-                String nextGenreText = "[" + nextGenre + "]";
                 int nextGenreCol = centerCol - nextGenreText.length() / 2;
-                printColoredString(nextGenreCol, startRow + 5 + (k-1)*4, nextGenreText, GENRE_COLOR);
+                printColoredString(nextGenreCol, startRow + 5 + (k - 1) * 4, nextGenreText, GENRE_COLOR);
 
+                // Prepare for next iteration
                 k++;
-                connIndex++;
             }
         }
 
@@ -407,26 +432,32 @@ public class MovieGameView implements IObserver {
         String key = powerUpType + ":" + activated;
         switch (key) {
             case "Time Boost:true":
-                showPowerupEffect("Time Boost Activated: +15 seconds!", TextColor.ANSI.GREEN_BRIGHT);
+                showTemporaryMessage("Time Boost Activated: +15 seconds!", TextColor.ANSI.GREEN_BRIGHT, true);
                 break;
             case "Time Boost:false":
-                showPowerupEffect("No Time Boosts Remaining!", TextColor.ANSI.RED);
+                showTemporaryMessage("No Time Boosts Remaining!", TextColor.ANSI.RED, true);
                 break;
             case "Time Sabotage:true":
-                showPowerupEffect("Time Sabotage Activated! Opponent's next turn will be shorter.", TextColor.ANSI.YELLOW);
+                showTemporaryMessage("Time Sabotage Activated! Opponent's next turn will be shorter.", TextColor.ANSI.YELLOW, true);
                 break;
             case "Time Sabotage:false":
-                showPowerupEffect("No Time Sabotages Remaining!", TextColor.ANSI.RED);
+                showTemporaryMessage("No Time Sabotages Remaining!", TextColor.ANSI.RED, true);
                 break;
         }
     }
 
-    private void showPowerupEffect(String message, TextColor color) throws IOException {
+    public void displayInvalidGuess() throws IOException {
+        showTemporaryMessage("Invalid guess! Try again.",TextColor.ANSI.RED, false);
+    }
+
+    private void showTemporaryMessage(String message, TextColor color, boolean restartTimer) throws IOException {
         TerminalSize size = screen.getTerminalSize();
         int messageCol = (size.getColumns() - message.length()) / 2;
 
-        Screen tempScreen = new TerminalScreen(terminal);
-        tempScreen.startScreen();
+        if (restartTimer) {
+            Screen tempScreen = new TerminalScreen(terminal);
+            tempScreen.startScreen();
+        }
 
         int boxWidth = message.length() + 4;
         int boxHeight = 3;
@@ -439,7 +470,7 @@ public class MovieGameView implements IObserver {
         screen.refresh();
 
         try {
-            Thread.sleep(1500);
+            Thread.sleep(2000);
         } catch (InterruptedException e) {
             Thread.currentThread().interrupt();
         }

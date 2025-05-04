@@ -5,6 +5,7 @@ import java.util.Set;
 
 public class Player {
     private String username;
+    private int score = 0;
     private Map<String, Integer> connections = new HashMap<>();;
     private Set<Movie> correctGuesses = new HashSet<>();;
     private Set<Movie> incorrectGuesses = new HashSet<>();
@@ -41,7 +42,7 @@ public class Player {
     }
 
     public int getConnectionOfPerson(String person) {
-        return connections.get(person);
+        return connections.getOrDefault(person, 0);
     }
 
     /**
@@ -83,11 +84,34 @@ public class Player {
         return incorrectGuesses;
     }
 
+    public boolean isPlayer(String name) {
+        return username.equals(name);
+    }
+
 
     /**
      * adds an incorrect guess to set
      */
     public void updateIncorrectGuesses(Movie guess) {
         this.incorrectGuesses.add(guess);
+    }
+
+    public int getScore() {
+        return score;
+    }
+
+    public void setScore(int score) {
+        this.score = score;
+    }
+
+    public void incrementScore() {
+        this.score++;
+    }
+
+    public void reset() {
+        score = 0;
+        correctGuesses.clear();
+        incorrectGuesses.clear();
+        connections.clear();
     }
 }
