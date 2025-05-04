@@ -1,3 +1,4 @@
+import java.lang.reflect.Array;
 import java.util.*;
 
 public class MovieGameModel implements IObservable {
@@ -19,11 +20,7 @@ public class MovieGameModel implements IObservable {
     private List<String> suggestions = new ArrayList<>();
     private int suggestionIndex = 0;
     private List<String> suggestionGenres = new ArrayList<>();
-    List<String> dictionary = new ArrayList<>();
-
-    private Deque<String> movieHistory = new ArrayDeque<>();
-    private List<String> connections = new ArrayList<>();
-    private List<Boolean> connectionOwners = new ArrayList<>(); // true for Player 1, false for Player 2
+    ArrayList<String> dictionary = new ArrayList<>();
 
     private int secondsRemaining = 30;
 
@@ -36,8 +33,6 @@ public class MovieGameModel implements IObservable {
     private int player1TimeSabotages = 1;  // Player 1 has 1 time sabotage power-up
     private int player2TimeSabotages = 1;  // Player 2 has 1 time sabotage power-up
     private boolean nextPlayerSabotaged = false;
-//    private boolean player1TimeSabotaged = false;
-//    private boolean player2TimeSabotaged = false;
 
 
     /**
@@ -49,10 +44,6 @@ public class MovieGameModel implements IObservable {
         this.lastFiveConnections.put(startingMovie.getTitle(), null);
         this.lastFivePlayers.put(startingMovie.getTitle(), null);
         this.allMovies.add(startingMovie);
-
-        // randomly starting player
-        Random rand = new Random();
-        int binary = rand.nextInt(2);  // returns 0 or 1
         this.currentPlayer = player1;
 
         // create dictionary of movie titles
@@ -70,14 +61,6 @@ public class MovieGameModel implements IObservable {
 
     public boolean isPlayer1Turn() {
         return (roundNumber % 2 == 0);
-    }
-
-    public Player getCurrentPlayer() {
-        return this.currentPlayer;
-    }
-
-    public void nextPlayer() {
-        currentPlayer = (currentPlayer == player1) ? player2 : player1;
     }
 
     public boolean getEnteringPlayer1() {
@@ -243,7 +226,7 @@ public class MovieGameModel implements IObservable {
         currentPlayer.updateConnections(connections); // connections map
         currentPlayer.updateCorrectGuesses(guess); // correct guesses set
         // update currentPlayer to next player
-        nextPlayer();
+        currentPlayer = (currentPlayer == player1) ? player2 : player1;
     }
 
 
@@ -252,7 +235,6 @@ public class MovieGameModel implements IObservable {
         intersectionSet.retainAll(movie2.getAllPeople());
         return intersectionSet;
     }
-
 
     /**
      * Adds a new observer

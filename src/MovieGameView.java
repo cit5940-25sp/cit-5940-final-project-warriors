@@ -143,12 +143,12 @@ public class MovieGameView implements IObserver {
         printColoredString(titleCol, 1, title, TITLE_COLOR);
 
         // Power-up display at top
-        boolean isPlayer1Turn = (model.getRoundNumber() % 2 == 0);
+        boolean isPlayer1Turn = (model.isPlayer1Turn());
         int timeBoostsRemaining = isPlayer1Turn ? model.getPlayer1TimeBoosts() : model.getPlayer2TimeBoosts();
         int timeSabotagesRemaining = isPlayer1Turn ? model.getPlayer1TimeSabotages() : model.getPlayer2TimeSabotages();
 
-        String powerupInfo = "POWER-UPS: [1] Add Time (" + timeBoostsRemaining +
-                " left) | [2] Sabotage Opponent (" + timeSabotagesRemaining + " left)";
+        String powerupInfo = "POWER-UPS: '[' Add Time (" + timeBoostsRemaining +
+                " left) | ']' Sabotage Opponent (" + timeSabotagesRemaining + " left)";
         printColoredString((size.getColumns() - powerupInfo.length()) / 2, 3, powerupInfo, TextColor.ANSI.YELLOW);
 
         // Player info below header
@@ -163,13 +163,13 @@ public class MovieGameView implements IObserver {
 
         // Current round and turn info
         String roundInfo = "Round: " + model.getRoundNumber();
-        String turnInfo = (model.getRoundNumber() % 2 == 0 ? model.getPlayer1Name() : model.getPlayer2Name()) + "'s Turn";
+        String turnInfo = (model.isPlayer1Turn() ? model.getPlayer1Name() : model.getPlayer2Name()) + "'s Turn";
         printColoredString(4, 10, roundInfo, TextColor.ANSI.WHITE);
-        printColoredString(4, 11, turnInfo, (model.getRoundNumber() % 2 == 0 ? PLAYER1_COLOR : PLAYER2_COLOR));
+        printColoredString(4, 11, turnInfo, (model.isPlayer1Turn() ? PLAYER1_COLOR : PLAYER2_COLOR));
 
         // Status effects display
         boolean nextPlayerWillBeSabotaged = false;
-        if (model.getRoundNumber() % 2 == 0 && model.getPlayer1TimeSabotages() < 0) {
+        if (model.isPlayer1Turn() && model.getPlayer1TimeSabotages() < 0) {
             nextPlayerWillBeSabotaged = true;
         } else if (model.getRoundNumber() % 2 != 0 && model.getPlayer2TimeSabotages() < 0) {
             nextPlayerWillBeSabotaged = true;

@@ -204,7 +204,6 @@ public class MovieGameController{
         shouldExit = true;
     }
 
-
     private void activateTimeBoost() throws IOException {
         if ((model.isPlayer1Turn() && model.getPlayer1TimeBoosts() > 0) ||
                 (!model.isPlayer1Turn() && model.getPlayer2TimeBoosts() > 0)) {
@@ -219,7 +218,7 @@ public class MovieGameController{
     }
 
     private void activateTimeSabotage() throws IOException {
-        boolean isPlayer1Turn = (model.getRoundNumber() % 2 == 0);
+        boolean isPlayer1Turn = (model.isPlayer1Turn());
 
         if ((isPlayer1Turn && model.getPlayer1TimeSabotages() > 0) ||
                 (!isPlayer1Turn && model.getPlayer2TimeSabotages() > 0)) {
