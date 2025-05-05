@@ -65,15 +65,19 @@ public class MovieGameController{
                 switch (keyStroke.getKeyType()) {
                     case ArrowUp:
                         model.moveSuggestionUp();
+                        model.notifyObservers("REFRESH");
                         break;
                     case ArrowDown:
                         model.moveSuggestionDown();
+                        model.notifyObservers("REFRESH");
                         break;
                     case ArrowLeft:
                         model.moveSuggestionLeft();
+                        model.notifyObservers("REFRESH");
                         break;
                     case ArrowRight:
                         model.moveSuggestionRight();
+                        model.notifyObservers("REFRESH");
                         break;
                     case Character:
                         handleCharacter(Character.toLowerCase(keyStroke.getCharacter()));
@@ -123,7 +127,7 @@ public class MovieGameController{
                 model.initializePlayerNames();
                 currentInput = new StringBuilder();
                 view.setCursorPosition(0);
-                view.updateScreen(this.currentInput);
+                model.notifyObservers("GAME_START");
             }
         }
         view.showLandingScreen();
@@ -169,6 +173,7 @@ public class MovieGameController{
 
     public void gameOver() throws IOException {
         view.showGameOverScreen();
+        model.notifyObservers("GAME_OVER");
 
         boolean waitingForInput = true;
         while (waitingForInput) {

@@ -36,6 +36,7 @@ public class MovieGameView implements IObserver {
     public MovieGameView(MovieGameModel model) throws IOException {
         // initialize model
         this.model = model;
+        model.addObserver(this);
 
         // initialize terminal and screen
         terminal = new DefaultTerminalFactory()
@@ -50,6 +51,9 @@ public class MovieGameView implements IObserver {
     }
 
     public void cleanUp() throws IOException {
+        if (model != null) {
+            model.removeObserver(this);
+        }
         screen.close();
         terminal.close();
     }
@@ -481,7 +485,24 @@ public class MovieGameView implements IObserver {
 
     @Override
     public void update(String event) {
-
+        try {
+            switch (event) {
+                case "REFRESH":
+                    updateScreen(new StringBuilder());
+                    break;
+                case "GAME_OVER":
+                    showGameOverScreen();
+                    break;
+                case "GAME_START":
+                    resetView();
+                    break;
+                default:
+                    updateScreen(new StringBuilder());
+                    break;
+            }
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
     }
 
 }
