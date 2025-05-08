@@ -3,6 +3,9 @@ import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
 
+/**
+ * Represents a player and their stats for the Movie Game.
+ */
 public class Player {
     private String username;
     private int score = 0;

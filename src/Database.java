@@ -3,6 +3,10 @@ import java.io.FileReader;
 import java.io.IOException;
 import java.util.*;
 
+/**
+ * The Database class stores the information for all of the movies
+ * in an index.
+ */
 public class Database {
 
      Map<String, Map<String, Set<String>>> moviePeopleMap;

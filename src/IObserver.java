@@ -2,6 +2,9 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Observable;
 
+/**
+ * Observers are classes that need to be notified of changes in an observable object.
+ */
 public interface IObserver {
 
     /**

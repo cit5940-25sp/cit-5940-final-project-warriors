@@ -1,3 +1,6 @@
+/**
+ * Observable allows observers to register and receive updates when its state changes.
+ */
 public interface IObservable {
 
     /**
