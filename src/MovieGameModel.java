@@ -6,6 +6,7 @@ public class MovieGameModel implements IObservable {
     private String player1Name = "";
     private String player2Name = "";
     private boolean enteringPlayer1 = true;
+    private boolean gameOver = false;
 
     private Player player1 = new Player();
     private Player player2 = new Player();
@@ -15,7 +16,7 @@ public class MovieGameModel implements IObservable {
     private Map<String, Player> lastFivePlayers = new HashMap<>(5);
     private Set<Movie> allMovies = new HashSet<>();
     private List<IObserver> observers = new ArrayList<>();
-    private boolean hasChanged;
+    private boolean hasChanged = false;
 
     private List<String> suggestions = new ArrayList<>();
     private int suggestionIndex = 0;
@@ -26,6 +27,15 @@ public class MovieGameModel implements IObservable {
 
     private boolean gameStarted = false;
     private int roundNumber = 0;
+    private String selectedGenre = "";
+    private int selectedGenreIndex = 0;
+    private boolean selectingGenre = false;
+    private final String[] genreList = {
+            "Action", "Adventure", "Animation", "Comedy",
+            "Crime", "Drama", "Family", "Fantasy",
+            "Horror", "Romance", "Sci-Fi", "Thriller"
+    };
+
 
     // Power-up system
     private int player1TimeBoosts = 2;
@@ -221,13 +231,21 @@ public class MovieGameModel implements IObservable {
         lastFiveConnections.put(guess.getTitle(), connections);
         lastFivePlayers.put(guess.getTitle(), currentPlayer);
         // update currentPlayer info
-        currentPlayer.incrementScore();
+        if (guess.getGenres().contains(selectedGenre)) {
+            currentPlayer.incrementScore();
+            if (currentPlayer.getScore() >= 5) {
+//                gameOver = true;
+                setChanged();
+                notifyObservers("GAME_OVER_" + (isPlayer1Turn()? "1" : "2"));
+                return;
+            }
+
+        }
         currentPlayer.updateConnections(connections); // connections map
         currentPlayer.updateCorrectGuesses(guess); // correct guesses set
         // update currentPlayer to next player
         currentPlayer = (currentPlayer == player1) ? player2 : player1;
     }
-
 
     private Set<String> getConnections(Movie movie1, Movie movie2) {
         Set<String> intersectionSet = movie1.getAllPeople();
@@ -388,6 +406,15 @@ public class MovieGameModel implements IObservable {
         }
     }
 
+    public void startNewGame() {
+        setGameStarted(true);
+        initializePlayerNames();
+        setChanged();
+        notifyObservers("GAME_START");
+        selectedGenre = genreList[selectedGenreIndex];
+        selectingGenre = false;
+    }
+
     public void resetModel(Movie startingMovie) {
         lastFiveConnections.clear();
         lastFivePlayers.clear();
@@ -420,4 +447,32 @@ public class MovieGameModel implements IObservable {
     }
 
 
+    public String getSelectedGenre() {
+        return selectedGenre;
+    }
+
+    public int getSelectedGenreIndex() {
+        return selectedGenreIndex;
+    }
+
+    public void selectNextGenre(int delta, int genresCount) {
+        selectedGenreIndex = (selectedGenreIndex + delta + genresCount) % genresCount;
+        selectedGenre = genreList[selectedGenreIndex];
+    }
+
+    public boolean isSelectingGenre() {
+        return selectingGenre;
+    }
+
+    public void setSelectingGenre(boolean selectingGenre) {
+        this.selectingGenre = selectingGenre;
+    }
+
+    public String[] getGenreList() {
+        return genreList;
+    }
+
+    public boolean getGameOver() {
+        return gameOver;
+    }
 }

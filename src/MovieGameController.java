@@ -5,7 +5,7 @@ import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
 
-public class MovieGameController{
+public class MovieGameController implements IObserver{
     private MovieGameModel model;
     private MovieGameView view;
     private Database database = new Database();
@@ -15,6 +15,7 @@ public class MovieGameController{
     private ScheduledExecutorService scheduler;
     private String selectedTitle = "";
     private boolean shouldExit = false;
+    private boolean gameOver = false;
 
     /**
      * Initialize a new MovieGameController
@@ -24,6 +25,7 @@ public class MovieGameController{
         this.database.loadFromCSV("cleaned_imdb_final.csv");
         this.model = new MovieGameModel(database.getRandomMovie(), database.getMovieNameSet());
         this.view = new MovieGameView(this.model);
+        this.model.addObserver(this);
 
         // schedule timer
         scheduler = Executors.newScheduledThreadPool(1);
@@ -36,29 +38,24 @@ public class MovieGameController{
                     e.printStackTrace();
                 }
             } else if (model.getSecondsRemaining() == 0 && model.isGameStarted()) {
-                try {
-                    gameOver();
-                } catch (IOException e) {
-                    e.printStackTrace();
-                }
+                model.setChanged();
+                model.notifyObservers("GAME_OVER_" + (model.isPlayer1Turn() ? "2" : "1"));
             }
         }, 1, 1, TimeUnit.SECONDS);
     }
 
     public void run() throws IOException {
-        boolean running = true;
         view.resetView();
-
+        boolean running = true;
         while (running && !shouldExit) {
             KeyStroke keyStroke = view.screenPollInput();
+            if (shouldExit) {
+                break;
+            }
             if (keyStroke != null) {
                 // game not started - show landing page
                 if (!model.isGameStarted()) {
                     handleLandingInput(keyStroke);
-                    continue;
-                }
-
-                if (model.getSecondsRemaining() == 0) {
                     continue;
                 }
 
@@ -96,6 +93,9 @@ public class MovieGameController{
                         break;
                 }
                 view.updateScreen(currentInput);
+//                if (!gameOver) {
+//
+//                }
             }
 
             try {
@@ -115,21 +115,36 @@ public class MovieGameController{
     }
 
     private void handleLandingInput(KeyStroke keyStroke) throws IOException {
-        if (keyStroke.getKeyType() == KeyType.Character) {
-            model.incrementPlayerNames(keyStroke.getCharacter());
-        } else if (keyStroke.getKeyType() == KeyType.Backspace) {
-            model.decrementPlayerNames();
-        } else if (keyStroke.getKeyType() == KeyType.Enter) {
-            if (model.getEnteringPlayer1() && !model.getPlayer1Name().isEmpty()) {
-                model.setEnteringPlayer1(false);
-            } else if (!model.getEnteringPlayer1() && !model.getPlayer2Name().isEmpty()) {
-                model.setGameStarted(true);
-                model.initializePlayerNames();
-                currentInput = new StringBuilder();
-                view.setCursorPosition(0);
-                model.notifyObservers("GAME_START");
+        if (!model.isSelectingGenre()) {
+            // player name entry phase
+            if (keyStroke.getKeyType() == KeyType.Character) {
+                model.incrementPlayerNames(keyStroke.getCharacter());
+            } else if (keyStroke.getKeyType() == KeyType.Backspace) {
+                model.decrementPlayerNames();
+            } else if (keyStroke.getKeyType() == KeyType.Enter) {
+                if (model.getEnteringPlayer1() && !model.getPlayer1Name().isEmpty()) {
+                    model.setEnteringPlayer1(false);
+                } else if (!model.getEnteringPlayer1() && !model.getPlayer2Name().isEmpty()) {
+                    model.setSelectingGenre(true);
+                }
+            }
+        } else {
+            // genre selection phase
+            switch (keyStroke.getKeyType()) {
+                case ArrowLeft -> model.selectNextGenre(-1, model.getGenreList().length);
+                case ArrowRight -> model.selectNextGenre(1, model.getGenreList().length);
+                case ArrowUp -> model.selectNextGenre(-4, model.getGenreList().length);
+                case ArrowDown -> model.selectNextGenre(4, model.getGenreList().length);
+                case Enter -> {
+                    // start game
+                    model.startNewGame();
+                    view.setCursorPosition(0);
+                    currentInput = new StringBuilder();
+                    return;
+                }
             }
         }
+
         view.showLandingScreen();
     }
 
@@ -171,10 +186,9 @@ public class MovieGameController{
         }
     }
 
-    public void gameOver() throws IOException {
-        view.showGameOverScreen();
-        model.notifyObservers("GAME_OVER");
-
+    private void gameOver() throws IOException {
+//        gameOver = true;
+        timerRunning = false;
         boolean waitingForInput = true;
         while (waitingForInput) {
             KeyStroke keyStroke = view.screenPollInput();
@@ -202,6 +216,8 @@ public class MovieGameController{
         model.resetModel(database.getRandomMovie());
         view.resetView();
         currentInput = new StringBuilder();
+//        gameOver = false;
+        timerRunning = true;
     }
 
     private void exitGame() throws IOException {
@@ -241,4 +257,15 @@ public class MovieGameController{
         }
     }
 
+    @Override
+    public void update(String event) {
+        System.out.println("Controller received event: " + event);
+        if (event.equals("GAME_OVER_1") || event.equals("GAME_OVER_2")) {
+            try {
+                gameOver();
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+        }
+    }
 }

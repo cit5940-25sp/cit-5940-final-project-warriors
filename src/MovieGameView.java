@@ -71,29 +71,78 @@ public class MovieGameView implements IObserver {
 
         drawBox(0, 0, size.getColumns() - 1, size.getRows() - 1);
 
+        // Title and subtitle
         String title = "MOVIE BATTLE";
         int titleCol = (size.getColumns() - title.length()) / 2;
-        printColoredString(titleCol, 3, title, TITLE_COLOR);
+        printColoredString(titleCol, 2, title, TITLE_COLOR);
 
         String subtitle = "Connect movies and challenge your film knowledge!";
         int subtitleCol = (size.getColumns() - subtitle.length()) / 2;
-        printColoredString(subtitleCol, 5, subtitle, TextColor.ANSI.WHITE);
+        printColoredString(subtitleCol, 4, subtitle, TextColor.ANSI.WHITE);
 
+        // Player name input boxes
         TextColor player1Color = model.getEnteringPlayer1() ? PLAYER1_COLOR : TextColor.ANSI.WHITE;
         TextColor player2Color = !model.getEnteringPlayer1() ? PLAYER2_COLOR : TextColor.ANSI.WHITE;
 
-        drawBox((size.getColumns() / 2) - 25, 10, (size.getColumns() / 2) + 25, 12);
-        drawBox((size.getColumns() / 2) - 25, 15, (size.getColumns() / 2) + 25, 17);
+        drawBox((size.getColumns() / 2) - 25, 6, (size.getColumns() / 2) + 25, 8);
+        drawBox((size.getColumns() / 2) - 25, 9, (size.getColumns() / 2) + 25, 11);
 
-        printColoredString((size.getColumns() / 2) - 20, 11,
+        printColoredString((size.getColumns() / 2) - 20, 7,
                 "Player 1 Name: " + model.getPlayer1Name(), player1Color);
-        printColoredString((size.getColumns() / 2) - 20, 16,
+        printColoredString((size.getColumns() / 2) - 20, 10,
                 "Player 2 Name: " + model.getPlayer2Name(), player2Color);
 
+        // Genre selection section
+        String[] genres = {
+                "Action", "Adventure", "Animation", "Comedy",
+                "Crime", "Drama", "Family", "Fantasy",
+                "Horror", "Romance", "Sci-Fi", "Thriller"
+        };
+        String selectedGenre = model.getSelectedGenre(); // Assumes getter
+
+        int genresPerRow = 4;
+        int boxWidth = 18;
+        int boxHeight = 3;
+        int totalBoxWidth = genresPerRow * boxWidth;
+        int startX = (size.getColumns() - totalBoxWidth) / 2;
+
+        String genreHeader = "Select Win Condition Genre:";
+        int genreHeaderCol = (size.getColumns() - genreHeader.length()) / 2;
+        printColoredString(genreHeaderCol, 13, genreHeader, TextColor.ANSI.YELLOW);
+
+        int genreBoxTop = 15;
+        for (int i = 0; i < genres.length; i++) {
+            int row = i / genresPerRow;
+            int col = i % genresPerRow;
+
+            int boxLeft = startX + col * boxWidth;
+            int boxTop = genreBoxTop + row * boxHeight;
+            int boxRight = boxLeft + boxWidth - 1;
+            int boxBottom = boxTop + boxHeight - 1;
+
+            String genre = genres[i];
+            int textCol = boxLeft + (boxWidth - genre.length()) / 2;
+            int textRow = boxTop + 1;
+
+            boolean isSelected = model.isSelectingGenre() && i == model.getSelectedGenreIndex();
+            TextColor genreColor = (model.isSelectingGenre() || !genre.equalsIgnoreCase(model.getSelectedGenre()))
+                    ? TextColor.ANSI.WHITE
+                    : TextColor.ANSI.GREEN_BRIGHT;
+
+            if (isSelected) {
+                drawColoredBox(boxLeft, boxTop, boxRight, boxBottom, TextColor.ANSI.YELLOW_BRIGHT);
+            } else {
+                drawBox(boxLeft, boxTop, boxRight, boxBottom);
+            }
+
+            printColoredString(textCol, textRow, genre, genreColor);
+        }
+
+        // Instructions section
         String[] instructions = {
                 "How To Play:",
                 "1. Players take turns naming movies",
-                "2. Each movie must have a connection to the previous movie",
+                "2. Each movie must connect to the previous (shared actor, director, etc.)",
                 "3. You have 30 seconds to make your move",
                 "4. If time runs out, the other player wins",
                 "5. Use arrow keys to navigate suggestions and Enter to select",
@@ -101,25 +150,43 @@ public class MovieGameView implements IObserver {
                 "7. Power-ups: Press ']' to reduce opponent's time next turn"
         };
 
-        int instructionCol = (size.getColumns() / 2) - 25;
+        int instructionStartRow = 25;
+        int instructionCol = (size.getColumns() - 60) / 2;
         for (int i = 0; i < instructions.length; i++) {
-            printColoredString(instructionCol, 22 + i, instructions[i], TextColor.ANSI.CYAN);
+            printColoredString(instructionCol, instructionStartRow + i, instructions[i], TextColor.ANSI.CYAN);
         }
 
+        // Start prompt
         if (!model.getEnteringPlayer1() && !model.getPlayer1Name().isEmpty() && !model.getPlayer2Name().isEmpty()) {
             String startPrompt = "Press Enter to Start";
             int startCol = (size.getColumns() - startPrompt.length()) / 2;
-            drawBox(startCol - 2, 30, startCol + startPrompt.length() + 2, 32);
-            printColoredString(startCol, 31, startPrompt, TextColor.ANSI.GREEN_BRIGHT);
+            drawBox(startCol - 2, 34, startCol + startPrompt.length() + 2, 36);
+            printColoredString(startCol, 35, startPrompt, TextColor.ANSI.GREEN_BRIGHT);
         }
 
+        // Cursor positioning
         int cursorCol = model.getEnteringPlayer1() ?
                 (size.getColumns() / 2) - 20 + "Player 1 Name: ".length() + model.getPlayer1Name().length() :
                 (size.getColumns() / 2) - 20 + "Player 2 Name: ".length() + model.getPlayer2Name().length();
-        int cursorRow = model.getEnteringPlayer1() ? 11 : 16;
+        int cursorRow = model.getEnteringPlayer1() ? 7 : 10;
         screen.setCursorPosition(new TerminalPosition(cursorCol, cursorRow));
 
         screen.refresh();
+    }
+
+    private void drawColoredBox(int left, int top, int right, int bottom, TextColor color) throws IOException {
+        for (int col = left; col <= right; col++) {
+            screen.setCharacter(col, top, new TextCharacter('─', color, TextColor.ANSI.DEFAULT));
+            screen.setCharacter(col, bottom, new TextCharacter('─', color, TextColor.ANSI.DEFAULT));
+        }
+        for (int row = top; row <= bottom; row++) {
+            screen.setCharacter(left, row, new TextCharacter('│', color, TextColor.ANSI.DEFAULT));
+            screen.setCharacter(right, row, new TextCharacter('│', color, TextColor.ANSI.DEFAULT));
+        }
+        screen.setCharacter(left, top, new TextCharacter('┌', color, TextColor.ANSI.DEFAULT));
+        screen.setCharacter(right, top, new TextCharacter('┐', color, TextColor.ANSI.DEFAULT));
+        screen.setCharacter(left, bottom, new TextCharacter('└', color, TextColor.ANSI.DEFAULT));
+        screen.setCharacter(right, bottom, new TextCharacter('┘', color, TextColor.ANSI.DEFAULT));
     }
 
     private String formatGenreSet(Set<String> genres) {
@@ -145,6 +212,13 @@ public class MovieGameView implements IObserver {
         String title = "MOVIE BATTLE";
         int titleCol = (size.getColumns() - title.length()) / 2;
         printColoredString(titleCol, 1, title, TITLE_COLOR);
+
+        // Show selected genre below the title
+        if (model.getSelectedGenre() != null && !model.getSelectedGenre().isEmpty()) {
+            String genreText = "Selected Genre: " + model.getSelectedGenre();
+            int genreCol = (size.getColumns() - genreText.length()) / 2;
+            printColoredString(genreCol, 2, genreText, GENRE_COLOR);
+        }
 
         // Power-up display at top
         boolean isPlayer1Turn = (model.isPlayer1Turn());
@@ -354,7 +428,7 @@ public class MovieGameView implements IObserver {
         }
     }
 
-    public String capitalizeTitle(String title) {
+    private String capitalizeTitle(String title) {
         String[] words = title.split(" ");
         StringBuilder capitalizedTitle = new StringBuilder();
         for (String word : words) {
@@ -367,7 +441,7 @@ public class MovieGameView implements IObserver {
     }
 
 
-    public void showGameOverScreen() throws IOException {
+    public void showGameOverScreen(int playerNum) throws IOException {
         screen.clear();
         screen.setCursorPosition(new TerminalPosition(-1, -1));
 
@@ -384,7 +458,7 @@ public class MovieGameView implements IObserver {
         int gameOverCol = (terminalWidth - gameOverMessage.length()) / 2;
 
         boolean player1Wins = model.getRoundNumber() % 2 != 0;
-        String winner = player1Wins ? model.getPlayer1Name() : model.getPlayer2Name();
+        String winner = (playerNum == 1) ? model.getPlayer1Name() : model.getPlayer2Name();
         String winnerMessage = winner + " Wins!";
         int winnerCol = (terminalWidth - winnerMessage.length()) / 2;
 
@@ -485,13 +559,17 @@ public class MovieGameView implements IObserver {
 
     @Override
     public void update(String event) {
+        System.out.println("View received event: " + event);
         try {
             switch (event) {
                 case "REFRESH":
                     updateScreen(new StringBuilder());
                     break;
-                case "GAME_OVER":
-                    showGameOverScreen();
+                case "GAME_OVER_1":
+                    showGameOverScreen(1);
+                    break;
+                case "GAME_OVER_2":
+                    showGameOverScreen(2);
                     break;
                 case "GAME_START":
                     resetView();
