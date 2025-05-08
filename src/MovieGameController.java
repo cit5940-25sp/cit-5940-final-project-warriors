@@ -15,7 +15,6 @@ public class MovieGameController implements IObserver{
     private ScheduledExecutorService scheduler;
     private String selectedTitle = "";
     private boolean shouldExit = false;
-    private boolean gameOver = false;
 
     /**
      * Initialize a new MovieGameController
@@ -93,9 +92,6 @@ public class MovieGameController implements IObserver{
                         break;
                 }
                 view.updateScreen(currentInput);
-//                if (!gameOver) {
-//
-//                }
             }
 
             try {
@@ -187,7 +183,6 @@ public class MovieGameController implements IObserver{
     }
 
     private void gameOver() throws IOException {
-//        gameOver = true;
         timerRunning = false;
         boolean waitingForInput = true;
         while (waitingForInput) {
@@ -216,7 +211,6 @@ public class MovieGameController implements IObserver{
         model.resetModel(database.getRandomMovie());
         view.resetView();
         currentInput = new StringBuilder();
-//        gameOver = false;
         timerRunning = true;
     }
 

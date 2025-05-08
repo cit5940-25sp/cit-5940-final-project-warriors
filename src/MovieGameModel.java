@@ -234,9 +234,8 @@ public class MovieGameModel implements IObservable {
         if (guess.getGenres().contains(selectedGenre)) {
             currentPlayer.incrementScore();
             if (currentPlayer.getScore() >= 5) {
-//                gameOver = true;
                 setChanged();
-                notifyObservers("GAME_OVER_" + (isPlayer1Turn()? "1" : "2"));
+                notifyObservers("GAME_OVER_" + (isPlayer1Turn()? "2" : "1"));
                 return;
             }
 
