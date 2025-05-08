@@ -10,7 +10,7 @@ public class Database {
      Map<String, Movie> movieMap;
 
     /**
-     * Initialize a new MovieGameModel
+     * Initialize a new MovieGameModel.
      */
     public Database() {
         moviePeopleMap = new HashMap<>();
@@ -18,9 +18,13 @@ public class Database {
         movieMap = new HashMap<>();
     }
 
+    /**
+     * Load in and store data from CSV.
+     *
+     * @param filePath The location of the CSV file.
+     */
     public void loadFromCSV(String filePath) {
         try (BufferedReader br = new BufferedReader(new FileReader(filePath))) {
-            String header = br.readLine();
 
             String line;
             while ((line = br.readLine()) != null) {
@@ -96,7 +100,9 @@ public class Database {
     }
 
     /**
-     * Helper method to parse CSV line properly handling quoted fields
+     * Helper method to parse CSV line properly handling quoted fields.
+     *
+     * @param line The line to be processed.
      */
     private String[] parseCSVLine(String line) {
         List<String> tokens = new ArrayList<>();
@@ -123,7 +129,7 @@ public class Database {
     }
 
     /**
-     * Helper method to parse people data
+     * Helper method to parse people data.
      */
     private List<String> parsePeopleData(String peopleData) {
         List<String> entries = new ArrayList<>();
@@ -145,7 +151,7 @@ public class Database {
     }
 
     /**
-     * Helper method to parse genre data
+     * Helper method to parse genre data.
      */
     private Set<String> parseGenres(String genreData) {
         Set<String> genres = new HashSet<>();
@@ -190,11 +196,11 @@ public class Database {
      * @return Movie
      */
     public Movie getRandomMovie() {
-//        Set<String> keySet = movieMap.keySet();
-//        int randomIndex = new Random().nextInt(keySet.size());
-//        String randomKey = (String) keySet.toArray()[randomIndex];
-//        return movieMap.get(randomKey);
-        return movieMap.get("Titanic (1997)");
+        Set<String> keySet = movieMap.keySet();
+        int randomIndex = new Random().nextInt(keySet.size());
+        String randomKey = (String) keySet.toArray()[randomIndex];
+        return movieMap.get(randomKey);
+        //return movieMap.get("Titanic (1997)");
     }
 
     /**

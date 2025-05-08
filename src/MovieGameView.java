@@ -12,7 +12,11 @@ import com.googlecode.lanterna.terminal.Terminal;
 import java.io.IOException;
 import java.util.*;
 
-public class MovieGameView implements IObserver {
+/**
+ * The MovieGameView class represents the visual interface for the movie connection game.
+ * It observes the MovieGameModel and updates its display based on model state changes.
+ */
+ public class MovieGameView implements IObserver {
     private MovieGameModel model;
 
     private Screen screen;
@@ -31,7 +35,7 @@ public class MovieGameView implements IObserver {
     private static final TextColor HIGHLIGHTED_BG = TextColor.ANSI.WHITE;
 
     /**
-     * Initializes a new MovieGameView
+     * Initializes the terminal-based view for the Movie Battle game.
      */
     public MovieGameView(MovieGameModel model) throws IOException {
         // initialize model
@@ -582,7 +586,7 @@ public class MovieGameView implements IObserver {
     /**
      * Displays a power-up activation or failure message based on its type and activation status.
      *
-     * @param powerUpType The type of power-up (e.g., "Time Boost" or "Time Sabotage").
+     * @param powerUpType The type of power-up ("Time Boost" or "Time Sabotage").
      * @param activated   Whether the power-up was successfully activated.
      * @throws IOException If an I/O error occurs during screen update.
      */

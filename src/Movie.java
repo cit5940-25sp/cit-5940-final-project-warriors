@@ -1,5 +1,9 @@
 import java.util.*;
 
+/**
+ * Represents a movie with a title, release date, genres, and directors, actors,
+ * writers, cinematographers, and composers.
+ */
 public class Movie {
     private String title;
     private int releaseDate;
@@ -10,6 +14,18 @@ public class Movie {
     private Set<String> cinematographers;
     private Set<String> composers;
 
+    /**
+     * Constructs a new Movie object with the specified details.
+     *
+     * @param title            the title of the movie
+     * @param releaseDate      the release year of the movie
+     * @param genres           the genres the movie belongs to
+     * @param directors        the directors of the movie
+     * @param actors           the actors in the movie
+     * @param writers          the writers of the movie
+     * @param cinematographers the cinematographers of the movie
+     * @param composers        the composers of the movie's score
+     */
     public Movie(String title, int releaseDate,
                  Set<String> genres,
                  Set<String> directors,
@@ -27,70 +43,60 @@ public class Movie {
         this.composers = composers;
     }
 
+    /**
+     * @return the movie's title
+     */
     public String getTitle() {
         return title;
     }
 
-    public void SetTitle(String title) {
-        this.title = title;
-    }
-
+    /**
+     * @return the release date of the movie
+     */
     public int getReleaseDate() {
         return releaseDate;
     }
 
-    public void SetReleaseDate(int releaseDate) {
-        this.releaseDate = releaseDate;
-    }
-
+    /**
+     * @return a set of genres associated with the movie
+     */
     public Set<String> getGenres() {
         return genres;
     }
 
-    public void SetGenres(Set<String> genres) {
-        this.genres = genres;
-    }
-
+    /**
+     * @return the directors of the movie
+     */
     public Set<String> getDirectors() {
         return directors;
     }
 
-    public void SetDirectors(Set<String> directors) {
-        this.directors = directors;
-    }
-
+    /**
+     * @return the actors of the movie
+     */
     public Set<String> getActors() {
         return actors;
     }
 
-    public void SetActors(Set<String> actors) {
-        this.actors = actors;
-    }
-
+    /**
+     * @return the writers of the movie
+     */
     public Set<String> getWriters() {
         return writers;
     }
 
-    public void SetWriters(Set<String> writers) {
-        this.writers = writers;
-    }
-
-    public Set<String> getCinematographers() {
-        return cinematographers;
-    }
-
-    public void SetCinematographers(Set<String> cinematographers) {
-        this.cinematographers = cinematographers;
-    }
-
+    /**
+     * @return the composers of the movie
+     */
     public Set<String> getComposers() {
         return composers;
     }
 
-    public void SetComposers(Set<String> composers) {
-        this.composers = composers;
-    }
-
+    /**
+     * Returns a set containing all people of the movie.
+     *
+     * @return a set of all contributor names
+     */
     public Set<String> getAllPeople() {
         Set<String> result = new HashSet<>();
         result.addAll(directors);
@@ -101,11 +107,22 @@ public class Movie {
         return result;
     }
 
+    /**
+     * Returns a string representation of the movie, including the title, release date, and genres.
+     *
+     * @return a string describing the movie
+     */
     @Override
     public String toString() {
         return title + ", " + releaseDate + ", " + genres;
     }
 
+    /**
+     * Checks if this movie is equal to another object based on the title.
+     *
+     * @param obj the object to compare with
+     * @return true if the titles are equal, false otherwise
+     */
     @Override
     public boolean equals(Object obj) {
         if (this == obj) return true;
@@ -114,6 +131,11 @@ public class Movie {
         return Objects.equals(this.getTitle(), other.getTitle());
     }
 
+    /**
+     * Returns a hash code value for the movie based on its title.
+     *
+     * @return the hash code
+     */
     @Override
     public int hashCode() {
         return Objects.hash(this.getTitle());

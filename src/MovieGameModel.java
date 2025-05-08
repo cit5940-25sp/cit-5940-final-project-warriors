@@ -1,8 +1,11 @@
-import java.lang.reflect.Array;
 import java.util.*;
 
+/**
+ * The MovieGameModel class has the core game logic for a two-player movie connection game.
+ * It handles state management, turn handling, guess validation, and observer updates.
+ * This model follows the Observer pattern and interacts with Movie and Player objects.
+ */
 public class MovieGameModel implements IObservable {
-
     private String player1Name = "";
     private String player2Name = "";
     private boolean enteringPlayer1 = true;
@@ -45,7 +48,11 @@ public class MovieGameModel implements IObservable {
     private boolean nextPlayerSabotaged = false;
 
     /**
-     * Initialize a new GameState
+     * Constructs a MovieGameModel with an initial movie and a set of all possible movie names.
+     * Initializes player state and the internal dictionary for autocomplete suggestions.
+     *
+     * @param startingMovie The first movie to be added to the game.
+     * @param movieNames A set of all movie titles to be used for suggestions.
      */
     public MovieGameModel(Movie startingMovie, Set<String> movieNames) {
         // initialize state with starting movie
@@ -64,30 +71,53 @@ public class MovieGameModel implements IObservable {
         }
     }
 
+    /**
+     * @return Map of movie titles to the player who submitted them.
+     */
     public Map<String, Player> getLastFivePlayers() {
         return this.lastFivePlayers;
     }
 
+    /**
+     * @return true if it's Player 1's turn.
+     */
     public boolean isPlayer1Turn() {
         return (roundNumber % 2 == 0);
     }
 
+    /**
+     * @return true if currently entering Player 1's name.
+     */
     public boolean getEnteringPlayer1() {
         return this.enteringPlayer1;
     }
 
+    /**
+     * @return the name entered for Player 1.
+     */
     public String getPlayer1Name() {
         return this.player1Name;
     }
 
+    /**
+     * @return the name entered for Player 2.
+     */
     public String getPlayer2Name() {
         return this.player2Name;
     }
 
+    /**
+     * Sets whether the current name being entered is for Player 1.
+     * @param bool true if entering name for Player 1.
+     */
     public void setEnteringPlayer1(boolean bool) {
         this.enteringPlayer1 = bool;
     }
 
+    /**
+     * Appends a character to the currently active player name being entered.
+     * @param charc the character to append.
+     */
     public void incrementPlayerNames(char charc) {
         if (enteringPlayer1) {
             player1Name += charc;
@@ -96,6 +126,9 @@ public class MovieGameModel implements IObservable {
         }
     }
 
+    /**
+     * Removes the last character from the current player name being entered.
+     */
     public void decrementPlayerNames() {
         if (enteringPlayer1 && !player1Name.isEmpty()) {
             player1Name = player1Name.substring(0, player1Name.length() - 1);
@@ -104,23 +137,35 @@ public class MovieGameModel implements IObservable {
         }
     }
 
+    /**
+     * Assigns the finalized names to each player.
+     */
     public void initializePlayerNames() {
         player1.setUsername(player1Name);
         player2.setUsername(player2Name);
     }
 
+    /**
+     * Moves suggestion index up in the suggestion list.
+     */
     public void moveSuggestionUp() {
         if (!getSuggestions().isEmpty()) {
             setSuggestionIndex((getSuggestionIndex() - 1 + getSuggestions().size()) % getSuggestions().size());
         }
     }
 
+    /**
+     * Moves suggestion index down in the suggestion list.
+     */
     public void moveSuggestionDown() {
         if (!getSuggestions().isEmpty()) {
             setSuggestionIndex((getSuggestionIndex() + 1) % getSuggestions().size());
         }
     }
 
+    /**
+     * Moves suggestion index to the left column.
+     */
     public void moveSuggestionLeft() {
         if (!getSuggestions().isEmpty() && getSuggestionIndex() >= 2) {
             // Move from right column to left column
@@ -128,6 +173,9 @@ public class MovieGameModel implements IObservable {
         }
     }
 
+    /**
+     * Moves suggestion index to the right column.
+     */
     public void moveSuggestionRight() {
         if (!getSuggestions().isEmpty() && getSuggestionIndex() < 2) {
             // Move from left column to right column
@@ -135,6 +183,10 @@ public class MovieGameModel implements IObservable {
         }
     }
 
+    /**
+     * Updates the list of autocomplete suggestions based on the current input prefix.
+     * @param currentInput a StringBuilder representing the user's current input.
+     */
     public void updateSuggestions(StringBuilder currentInput) {
         suggestions.clear();
         suggestionGenres.clear();
@@ -154,29 +206,31 @@ public class MovieGameModel implements IObservable {
     }
 
     /**
-     *
-     * @return a queue of the movies that have been played in order
+     * @return a queue of the movies that have been played in order.
      */
     public Deque<Movie> getLastFiveMovies() {
         return this.lastFiveMovies;
     }
 
     /**
-     *
-     * @return a queue of the movies that have been played in order
+     * @return a queue of the movies that have been played in order.
      */
     public Map<String, Set<String>> getLastFiveConnections() {
         return this.lastFiveConnections;
     }
 
     /**
-     * Returns the most recently added movie
-     * @return
+     * @return the most recently added movie.
      */
     private Movie getMostRecentMovie() {
         return getLastFiveMovies().peekLast();
     }
 
+    /**
+     * Validates a guessed movie based on connection rules and updates state if valid.
+     * @param guess The Movie being guessed.
+     * @return true if the guess was valid and accepted.
+     */
     public boolean validateGuess(Movie guess) {
         // if guessed before, even if incorrect
         if (allMovies.contains(guess)) {
@@ -215,6 +269,12 @@ public class MovieGameModel implements IObservable {
         return true;
     }
 
+    /**
+     * Updates the game state based on the player's guess.
+     *
+     * @param guess       the {@link Movie} object representing the player's guess
+     * @param connections a set of shared people (actors, directors, etc.) between the guessed movie and the previous movie
+     */
     private void updateGuess(Movie guess, Set<String> connections) {
         // ensure lastFiveMovies and lastFiveConnections doesn't exceed 5
         if (lastFiveMovies.size() == 5) {
@@ -246,6 +306,13 @@ public class MovieGameModel implements IObservable {
         currentPlayer = (currentPlayer == player1) ? player2 : player1;
     }
 
+    /**
+     * Retrieves the set of people common to both movies.
+     *
+     * @param movie1 the first {@link Movie} object
+     * @param movie2 the second {@link Movie} object
+     * @return a set of names that appear in both movies' contributor lists
+     */
     private Set<String> getConnections(Movie movie1, Movie movie2) {
         Set<String> intersectionSet = movie1.getAllPeople();
         intersectionSet.retainAll(movie2.getAllPeople());
@@ -253,7 +320,7 @@ public class MovieGameModel implements IObservable {
     }
 
     /**
-     * Adds a new observer
+     * Adds a new observer.
      */
     @Override
     public void addObserver(IObserver o) {
@@ -261,7 +328,7 @@ public class MovieGameModel implements IObservable {
     }
 
     /**
-     * Removes an observer
+     * Removes an observer.
      */
     @Override
     public void removeObserver(IObserver o) {
@@ -269,7 +336,7 @@ public class MovieGameModel implements IObservable {
     }
 
     /**
-     * Clears all observers
+     * Clears all observers.
      */
     @Override
     public void removeAllObservers() {
@@ -277,7 +344,7 @@ public class MovieGameModel implements IObservable {
     }
 
     /**
-     * Update observer status
+     * Update observer status.
      */
     @Override
     public void setChanged() {
@@ -285,7 +352,7 @@ public class MovieGameModel implements IObservable {
     }
 
     /**
-     * Reset an observer
+     * Reset an observer.
      */
     @Override
     public void clearChanged() {
@@ -293,7 +360,7 @@ public class MovieGameModel implements IObservable {
     }
 
     /**
-     * @return if an observer has been updated
+     * @return true if an observer has been updated.
      */
     @Override
     public boolean hasChanged() {
@@ -301,7 +368,8 @@ public class MovieGameModel implements IObservable {
     }
 
     /**
-     * Updates observers if there has been a change
+     * Notifies all registered observers of a specific game event.
+     * @param event A string representing the event.
      */
     @Override
     public void notifyObservers(String event) {
@@ -315,74 +383,133 @@ public class MovieGameModel implements IObservable {
         }
     }
 
+    /**
+     * @return List of current autocomplete suggestions.
+     */
     public List<String> getSuggestions() {
         return suggestions;
     }
 
+    /**
+     * @return The current suggestion index.
+     */
     public int getSuggestionIndex() {
         return suggestionIndex;
     }
 
+    /**
+     * Sets the current suggestion index.
+     * @param suggestionIndex The index to set.
+     */
     public void setSuggestionIndex(int suggestionIndex) {
         this.suggestionIndex = suggestionIndex;
     }
 
+    /**
+     * @return Remaining time in seconds for current round.
+     */
     public int getSecondsRemaining() {
         return secondsRemaining;
     }
 
+    /**
+     * Decrements the timer by one second.
+     */
     public void decrementSecondsRemaining() {
         this.secondsRemaining--;
     }
 
+    /**
+     * @return true if the game has officially started.
+     */
     public boolean isGameStarted() {
         return gameStarted;
     }
 
+    /**
+     * Sets whether the game has started.
+     * @param gameStarted true to indicate game start.
+     */
     public void setGameStarted(boolean gameStarted) {
         this.gameStarted = gameStarted;
     }
 
+    /**
+     * @return the current round number.
+     */
     public int getRoundNumber() {
         return roundNumber;
     }
 
+    /**
+     * @return Player 1's current score.
+     */
     public int getPlayer1Score() {
         return player1.getScore();
     }
 
+    /**
+     * @return Player 2's current score.
+     */
     public int getPlayer2Score() {
         return player2.getScore();
     }
 
+    /**
+     * @return Remaining time boosts for Player 1.
+     */
     public int getPlayer1TimeBoosts() {
         return player1TimeBoosts;
     }
 
+    /**
+     * @return Remaining time boosts for Player 2.
+     */
     public int getPlayer2TimeBoosts() {
         return player2TimeBoosts;
     }
 
+    /**
+     * @return Remaining time sabotages for Player 1.
+     */
     public int getPlayer1TimeSabotages() {
         return player1TimeSabotages;
     }
 
+    /**
+     * Sets Player 1's time sabotages.
+     * @param player1TimeSabotages number of sabotages left.
+     */
     public void setPlayer1TimeSabotages(int player1TimeSabotages) {
         this.player1TimeSabotages = player1TimeSabotages;
     }
 
+    /**
+     * @return Remaining time sabotages for Player 2.
+     */
     public int getPlayer2TimeSabotages() {
         return player2TimeSabotages;
     }
 
+    /**
+     * Sets Player 2's time sabotages.
+     * @param player2TimeSabotages number of sabotages left.
+     */
     public void setPlayer2TimeSabotages(int player2TimeSabotages) {
         this.player2TimeSabotages = player2TimeSabotages;
     }
 
+    /**
+     * Applies sabotage effect to the next player by reducing their available time.
+     * @param nextPlayerSabotaged true if next player is sabotaged.
+     */
     public void setNextPlayerSabotaged(boolean nextPlayerSabotaged) {
         this.nextPlayerSabotaged = nextPlayerSabotaged;
     }
 
+    /**
+     * Prepares the game state for the next round and adjusts timers accordingly.
+     */
     public void updateToNextRound() {
         System.out.println("Next player sabotaged: " + nextPlayerSabotaged);
 
@@ -396,6 +523,9 @@ public class MovieGameModel implements IObservable {
         suggestionGenres.clear();
     }
 
+    /**
+     * Adds 15 seconds to the current player's timer and reduces their remaining time boosts by one.
+     */
     public void updateTimeBoosts() {
         secondsRemaining += 15;
         if (isPlayer1Turn()) {
@@ -405,6 +535,9 @@ public class MovieGameModel implements IObservable {
         }
     }
 
+    /**
+     * Starts a new game session by initializing player names and notifying observers of the game start event.
+     */
     public void startNewGame() {
         setGameStarted(true);
         initializePlayerNames();
@@ -414,6 +547,11 @@ public class MovieGameModel implements IObservable {
         selectingGenre = false;
     }
 
+    /**
+     * Resets the game model to its initial state using a given starting movie.
+     *
+     * @param startingMovie the movie to initialize the game with.
+     */
     public void resetModel(Movie startingMovie) {
         lastFiveConnections.clear();
         lastFivePlayers.clear();
@@ -445,32 +583,57 @@ public class MovieGameModel implements IObservable {
         allMovies.add(startingMovie);
     }
 
-
+    /**
+     * @return the currently selected genre.
+     */
     public String getSelectedGenre() {
         return selectedGenre;
     }
 
+    /**
+     * @return the index of the currently selected genre in the genre list.
+     */
     public int getSelectedGenreIndex() {
         return selectedGenreIndex;
     }
 
+    /**
+     * Updates the selected genre index by a delta value, cycling through available genres.
+     *
+     * @param delta       the amount to change the index by.
+     * @param genresCount the total number of genres in the list.
+     */
     public void selectNextGenre(int delta, int genresCount) {
         selectedGenreIndex = (selectedGenreIndex + delta + genresCount) % genresCount;
         selectedGenre = genreList[selectedGenreIndex];
     }
 
+    /**
+     * @return true if the game is in the genre selection phase.
+     */
     public boolean isSelectingGenre() {
         return selectingGenre;
     }
 
+    /**
+     * Sets whether the game is currently in the genre selection phase.
+     *
+     * @param selectingGenre true to indicate genre selection is in progress.
+     */
     public void setSelectingGenre(boolean selectingGenre) {
         this.selectingGenre = selectingGenre;
     }
 
+    /**
+     * @return the full list of available genres.
+     */
     public String[] getGenreList() {
         return genreList;
     }
 
+    /**
+     * @return true if the game has ended.
+     */
     public boolean getGameOver() {
         return gameOver;
     }

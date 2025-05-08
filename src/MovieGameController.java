@@ -5,6 +5,11 @@ import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
 
+/**
+ * Controller class for the Movie Name Game. Handles input, game state transitions, and
+ * coordinates updates between the model and view in an MVC architecture.
+ * Implements the IObserver interface to respond to events.
+ */
 public class MovieGameController implements IObserver{
     private MovieGameModel model;
     private MovieGameView view;
@@ -17,7 +22,10 @@ public class MovieGameController implements IObserver{
     private boolean shouldExit = false;
 
     /**
-     * Initialize a new MovieGameController
+     * Constructs a new MovieGameController, initializes the database, model, and view,
+     * sets up the game timer, and registers the view as an observer.
+     *
+     * @throws IOException If there is an error loading the movie database or updating the view.
      */
     public MovieGameController() throws IOException {
         // initialize database, model, and view
@@ -43,6 +51,12 @@ public class MovieGameController implements IObserver{
         }, 1, 1, TimeUnit.SECONDS);
     }
 
+    /**
+     * Main game loop that handles user input and dispatches actions accordingly.
+     * Continuously polls for keyboard input and updates the model and view.
+     *
+     * @throws IOException if screen polling or rendering encounters an error.
+     */
     public void run() throws IOException {
         view.resetView();
         boolean running = true;
@@ -103,6 +117,11 @@ public class MovieGameController implements IObserver{
         cleanup();
     }
 
+    /**
+     * Cleans up resources like the scheduler and view at the end of the game.
+     *
+     * @throws IOException If there is an error cleaning up the view.
+     */
     private void cleanup() throws IOException {
         if (scheduler != null && !scheduler.isShutdown()) {
             scheduler.shutdown();
@@ -110,6 +129,12 @@ public class MovieGameController implements IObserver{
         view.cleanUp();
     }
 
+    /**
+     * Handles user input during the landing screen phase.
+     *
+     * @param keyStroke The input key pressed by the user.
+     * @throws IOException If there is an error updating the view.
+     */
     private void handleLandingInput(KeyStroke keyStroke) throws IOException {
         if (!model.isSelectingGenre()) {
             // player name entry phase
@@ -144,6 +169,12 @@ public class MovieGameController implements IObserver{
         view.showLandingScreen();
     }
 
+    /**
+     * Processes a character input during gameplay and updates the current input and suggestions.
+     *
+     * @param c The character typed by the player.
+     * @throws IOException If there is an error updating the screen.
+     */
     private void handleCharacter(char c) throws IOException {
         if (c == '[') {
             activateTimeBoost();
@@ -156,6 +187,9 @@ public class MovieGameController implements IObserver{
         }
     }
 
+    /**
+     * Handles backspace input to remove a character and update suggestions accordingly.
+     */
     private void handleBackspace() {
         if (view.getCursorPosition() > 0) {
             currentInput.deleteCharAt(view.getCursorPosition() - 1);
@@ -164,6 +198,11 @@ public class MovieGameController implements IObserver{
         }
     }
 
+    /**
+     * Handles Enter key input by validating the selected movie guess and proceeding to the next round if valid.
+     *
+     * @throws IOException If there is an error updating the view.
+     */
     private void handleEnter() throws IOException {
         // if no suggestions, do nothing
         if (model.getSuggestions().isEmpty()) {
@@ -182,6 +221,12 @@ public class MovieGameController implements IObserver{
         }
     }
 
+    /**
+     * Displays the game over screen and waits for the user to choose between
+     * restarting or quitting the game.
+     *
+     * @throws IOException if screen updates fail.
+     */
     private void gameOver() throws IOException {
         timerRunning = false;
         boolean waitingForInput = true;
@@ -207,6 +252,11 @@ public class MovieGameController implements IObserver{
         }
     }
 
+    /**
+     * Resets the game state and restarts the view and model for a new session.
+     *
+     * @throws IOException if resetting view fails.
+     */
     private void restartGame() throws IOException {
         model.resetModel(database.getRandomMovie());
         view.resetView();
@@ -214,11 +264,21 @@ public class MovieGameController implements IObserver{
         timerRunning = true;
     }
 
+    /**
+     * Displays the exit screen and marks the game for shutdown.
+     *
+     * @throws IOException if the view fails to display the exit screen.
+     */
     private void exitGame() throws IOException {
         view.showExitScreen();
         shouldExit = true;
     }
 
+    /**
+     * Activates the time boost power-up, if available, giving the current player more time.
+     *
+     * @throws IOException if view fails to display the power-up or update.
+     */
     private void activateTimeBoost() throws IOException {
         if ((model.isPlayer1Turn() && model.getPlayer1TimeBoosts() > 0) ||
                 (!model.isPlayer1Turn() && model.getPlayer2TimeBoosts() > 0)) {
@@ -232,6 +292,11 @@ public class MovieGameController implements IObserver{
         }
     }
 
+    /**
+     * Activates the time sabotage power-up, if available, reducing the opponent's time.
+     *
+     * @throws IOException if view fails to display the power-up or update.
+     */
     private void activateTimeSabotage() throws IOException {
         boolean isPlayer1Turn = (model.isPlayer1Turn());
 
@@ -251,6 +316,12 @@ public class MovieGameController implements IObserver{
         }
     }
 
+    /**
+     * Handles updates to the controller from the model based on game events.
+     * If the event indicates a game over, it triggers the end-game flow.
+     *
+     * @param event The type of event that occurred (e.g., "REFRESH", "GAME_OVER_1").
+     */
     @Override
     public void update(String event) {
         System.out.println("Controller received event: " + event);

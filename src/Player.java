@@ -15,6 +15,11 @@ public class Player {
      */
     public Player() {};
 
+    /**
+     * Initialize a new Player
+     *
+     * @param username The username of the player
+     */
     public Player(String username) {
         this.username = username;
     }
@@ -47,12 +52,16 @@ public class Player {
 
     /**
      * Sets the connections map of the player
-     * @param connections
+     * @param connections Map of connections
      */
     public void setConnections(Map<String, Integer> connections) {
         this.connections = connections;
     }
 
+    /**
+     * Updates the connections map of the player
+     * @param connectionsToUpdate Set of connections to update
+     */
     public void updateConnections(Set<String> connectionsToUpdate) {
         for (String person : connectionsToUpdate) {
             int current = connections.getOrDefault(person, 0);
@@ -96,18 +105,30 @@ public class Player {
         this.incorrectGuesses.add(guess);
     }
 
+    /**
+     * @return the score
+     */
     public int getScore() {
         return score;
     }
 
+    /**
+     * sets the score field
+     */
     public void setScore(int score) {
         this.score = score;
     }
 
+    /**
+     * increments the score
+     */
     public void incrementScore() {
         this.score++;
     }
 
+    /**
+     * resets the score, guesses, and connections
+     */
     public void reset() {
         score = 0;
         correctGuesses.clear();
