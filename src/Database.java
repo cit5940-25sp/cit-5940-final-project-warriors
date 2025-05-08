@@ -190,6 +190,10 @@ public class Database {
      * @return Movie
      */
     public Movie getRandomMovie() {
+//        Set<String> keySet = movieMap.keySet();
+//        int randomIndex = new Random().nextInt(keySet.size());
+//        String randomKey = (String) keySet.toArray()[randomIndex];
+//        return movieMap.get(randomKey);
         return movieMap.get("Titanic (1997)");
     }
 
