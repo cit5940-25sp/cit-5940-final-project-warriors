@@ -46,10 +46,21 @@ public class MovieGameView implements IObserver {
         this.screen.startScreen();
     }
 
+    /**
+     * Polls and returns the next keyboard input from the user, if available.
+     *
+     * @return The next {@link KeyStroke} entered, or null if no input is available.
+     * @throws IOException if polling the screen input fails.
+     */
     public KeyStroke screenPollInput() throws IOException {
         return screen.pollInput();
     }
 
+    /**
+     * Cleans up the terminal and screen resources and removes the view as an observer from the model.
+     *
+     * @throws IOException if closing the terminal or screen fails.
+     */
     public void cleanUp() throws IOException {
         if (model != null) {
             model.removeObserver(this);
@@ -58,12 +69,22 @@ public class MovieGameView implements IObserver {
         terminal.close();
     }
 
+    /**
+     * Resets the view by clearing the screen and showing the landing screen.
+     *
+     * @throws IOException if clearing or refreshing the screen fails.
+     */
     public void resetView() throws IOException {
         screen.clear();
         showLandingScreen();
         screen.refresh();
     }
 
+    /**
+     * Displays the initial landing screen, including title, player name inputs, genre selection, and instructions.
+     *
+     * @throws IOException if screen drawing or refreshing fails.
+     */
     public void showLandingScreen() throws IOException {
         screen.clear();
         screen.refresh();
@@ -174,6 +195,17 @@ public class MovieGameView implements IObserver {
         screen.refresh();
     }
 
+
+    /**
+     * Draws a colored box with borders at the specified coordinates.
+     *
+     * @param left   Left column position of the box.
+     * @param top    Top row position of the box.
+     * @param right  Right column position of the box.
+     * @param bottom Bottom row position of the box.
+     * @param color  The color used for the box's border.
+     * @throws IOException if setting characters on the screen fails.
+     */
     private void drawColoredBox(int left, int top, int right, int bottom, TextColor color) throws IOException {
         for (int col = left; col <= right; col++) {
             screen.setCharacter(col, top, new TextCharacter('─', color, TextColor.ANSI.DEFAULT));
@@ -189,14 +221,32 @@ public class MovieGameView implements IObserver {
         screen.setCharacter(right, bottom, new TextCharacter('┘', color, TextColor.ANSI.DEFAULT));
     }
 
+    /**
+     * Formats a set of genres into a comma-separated string.
+     *
+     * @param genres A set of genre names.
+     * @return A comma-separated string representation of the genres.
+     */
     private String formatGenreSet(Set<String> genres) {
         return String.join(", ", genres);
     }
 
+    /**
+     * Returns the current terminal size of the screen.
+     *
+     * @return The {@link TerminalSize} of the screen.
+     */
     private TerminalSize getSize() {
         return screen.getTerminalSize();
     }
 
+    /**
+     * Updates the screen during gameplay, showing the current state including genre,
+     * power-up information, scores, and current input.
+     *
+     * @param currentInput The current input string being entered by the user.
+     * @throws IOException if screen clearing, drawing, or refreshing fails.
+     */
     public void updateScreen(StringBuilder currentInput) throws IOException {
         if (model.getSecondsRemaining() == 0 && model.isGameStarted()) {
             return;
@@ -391,6 +441,14 @@ public class MovieGameView implements IObserver {
         screen.refresh();
     }
 
+    /**
+     * Draws a rectangular box using Unicode characters on the screen.
+     *
+     * @param x1 The x-coordinate of the top-left corner.
+     * @param y1 The y-coordinate of the top-left corner.
+     * @param x2 The x-coordinate of the bottom-right corner.
+     * @param y2 The y-coordinate of the bottom-right corner.
+     */
     private void drawBox(int x1, int y1, int x2, int y2) {
         TextGraphics tg = screen.newTextGraphics();
         tg.setForegroundColor(TextColor.ANSI.WHITE);
@@ -411,7 +469,13 @@ public class MovieGameView implements IObserver {
         }
     }
 
-
+    /**
+     * Prints a white-colored string at the specified screen coordinates.
+     *
+     * @param column The starting column (x-coordinate).
+     * @param row    The row (y-coordinate) where the text is printed.
+     * @param text   The string to print.
+     */
     private void printString(int column, int row, String text) {
         for (int i = 0; i < text.length(); i++) {
             screen.setCharacter(column + i, row,
@@ -420,6 +484,14 @@ public class MovieGameView implements IObserver {
         }
     }
 
+    /**
+     * Prints a string with the specified foreground color at the given screen coordinates.
+     *
+     * @param column The starting column (x-coordinate).
+     * @param row    The row (y-coordinate) where the text is printed.
+     * @param text   The string to print.
+     * @param color  The text color to use.
+     */
     private void printColoredString(int column, int row, String text, TextColor color) {
         for (int i = 0; i < text.length(); i++) {
             screen.setCharacter(column + i, row,
@@ -428,6 +500,12 @@ public class MovieGameView implements IObserver {
         }
     }
 
+    /**
+     * Capitalizes the first letter of each word in the movie title.
+     *
+     * @param title The input movie title.
+     * @return The capitalized movie title.
+     */
     private String capitalizeTitle(String title) {
         String[] words = title.split(" ");
         StringBuilder capitalizedTitle = new StringBuilder();
@@ -440,7 +518,12 @@ public class MovieGameView implements IObserver {
         return capitalizedTitle.toString().trim();
     }
 
-
+    /**
+     * Displays the Game Over screen, announcing the winner and showing options to restart or quit.
+     *
+     * @param playerNum The number of the player who lost (used to determine the winner).
+     * @throws IOException If an I/O error occurs during screen update.
+     */
     public void showGameOverScreen(int playerNum) throws IOException {
         screen.clear();
         screen.setCursorPosition(new TerminalPosition(-1, -1));
@@ -448,8 +531,6 @@ public class MovieGameView implements IObserver {
         TerminalSize size = screen.getTerminalSize();
         int terminalWidth = size.getColumns();
         int terminalHeight = size.getRows();
-
-
 
         drawBox(terminalWidth / 4 + 2, terminalHeight / 4 + 2,
                 terminalWidth * 3 / 4 - 2, terminalHeight * 3 / 4 - 2);
@@ -473,6 +554,11 @@ public class MovieGameView implements IObserver {
         screen.refresh();
     }
 
+    /**
+     * Displays the exit screen with a goodbye message and closes the game view.
+     *
+     * @throws IOException If an I/O error occurs during screen update.
+     */
     public void showExitScreen() throws IOException {
         screen.clear();
         TerminalSize size = screen.getTerminalSize();
@@ -493,6 +579,13 @@ public class MovieGameView implements IObserver {
         }
     }
 
+    /**
+     * Displays a power-up activation or failure message based on its type and activation status.
+     *
+     * @param powerUpType The type of power-up (e.g., "Time Boost" or "Time Sabotage").
+     * @param activated   Whether the power-up was successfully activated.
+     * @throws IOException If an I/O error occurs during screen update.
+     */
     public void displayPowerUp(String powerUpType, boolean activated) throws IOException {
         String key = powerUpType + ":" + activated;
         switch (key) {
@@ -511,10 +604,23 @@ public class MovieGameView implements IObserver {
         }
     }
 
+    /**
+     * Displays a message indicating the user made an invalid guess.
+     *
+     * @throws IOException If an I/O error occurs during screen update.
+     */
     public void displayInvalidGuess() throws IOException {
-        showTemporaryMessage("Invalid guess! Try again.",TextColor.ANSI.RED, false);
+        showTemporaryMessage("Invalid guess! Try again.", TextColor.ANSI.RED, false);
     }
 
+    /**
+     * Shows a temporary, centered message inside a box for a brief duration.
+     *
+     * @param message      The message to display.
+     * @param color        The color of the text.
+     * @param restartTimer Whether to restart the screen session (e.g., for effects like time boosts).
+     * @throws IOException If an I/O error occurs during screen update.
+     */
     private void showTemporaryMessage(String message, TextColor color, boolean restartTimer) throws IOException {
         TerminalSize size = screen.getTerminalSize();
         int messageCol = (size.getColumns() - message.length()) / 2;
@@ -541,22 +647,43 @@ public class MovieGameView implements IObserver {
         }
     }
 
+    /**
+     * Gets the current cursor position.
+     *
+     * @return The current cursor position.
+     */
     public int getCursorPosition() {
         return this.cursorPosition;
     }
 
+    /**
+     * Sets the cursor position to the given value.
+     *
+     * @param pos The new cursor position.
+     */
     public void setCursorPosition(int pos) {
         this.cursorPosition = pos;
     }
 
+    /**
+     * Increments the cursor position by 1.
+     */
     public void incrementCursorPosition() {
         this.cursorPosition++;
     }
 
+    /**
+     * Decrements the cursor position by 1.
+     */
     public void decrementCursorPosition() {
         this.cursorPosition--;
     }
 
+    /**
+     * Handles updates to the view based on a string-based event emitted by the model.
+     *
+     * @param event The type of event that occurred (e.g., "REFRESH", "GAME_OVER_1").
+     */
     @Override
     public void update(String event) {
         System.out.println("View received event: " + event);
@@ -582,5 +709,4 @@ public class MovieGameView implements IObserver {
             throw new RuntimeException(e);
         }
     }
-
 }
