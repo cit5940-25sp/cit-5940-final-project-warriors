@@ -75,6 +75,9 @@ public class MovieGameModel implements IObservable {
     }
 
     // Getters and setters
+    public Player getCurrentPlayer() {
+        return currentPlayer;
+    }
 
     /**
      * @return the name entered for Player 1.
@@ -555,6 +558,7 @@ public class MovieGameModel implements IObservable {
         lastFiveMovies.clear();
         suggestions.clear();
         suggestionGenres.clear();
+        selectedGenre = "";
         allMovies.clear();
 
 
@@ -569,6 +573,7 @@ public class MovieGameModel implements IObservable {
         player2TimeBoosts = 2;
         player1TimeSabotages = 1;
         player2TimeSabotages = 1;
+        nextPlayerSabotaged = false;
 
         player1.reset();
         player2.reset();
