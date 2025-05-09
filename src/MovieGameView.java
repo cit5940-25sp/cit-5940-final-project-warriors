@@ -36,6 +36,8 @@ import java.util.*;
 
     /**
      * Initializes the terminal-based view for the Movie Battle game.
+     *
+     * @param model Instance of model for movie game
      */
     public MovieGameView(MovieGameModel model) throws IOException {
         // initialize model
