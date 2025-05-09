@@ -86,6 +86,13 @@ public class Movie {
     }
 
     /**
+     * @return the cinematographers of the movie
+     */
+    public Set<String> getCinematographers() {
+        return cinematographers;
+    }
+
+    /**
      * @return the composers of the movie
      */
     public Set<String> getComposers() {
@@ -116,30 +123,5 @@ public class Movie {
     public String toString() {
         return title + ", " + releaseDate + ", " + genres;
     }
-
-    /**
-     * Checks if this movie is equal to another object based on the title.
-     *
-     * @param obj the object to compare with
-     * @return true if the titles are equal, false otherwise
-     */
-    @Override
-    public boolean equals(Object obj) {
-        if (this == obj) return true;
-        if (obj == null || getClass() != obj.getClass()) return false;
-        Movie other = (Movie) obj;
-        return Objects.equals(this.getTitle(), other.getTitle());
-    }
-
-    /**
-     * Returns a hash code value for the movie based on its title.
-     *
-     * @return the hash code
-     */
-    @Override
-    public int hashCode() {
-        return Objects.hash(this.getTitle());
-    }
-
 
 }

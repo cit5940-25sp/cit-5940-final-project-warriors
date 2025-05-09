@@ -41,13 +41,6 @@ public class Player {
      */
     public void setUsername(String username) {this.username = username;}
 
-    /**
-     *
-     * @return the connections map of the player
-     */
-    public Map<String, Integer> getConnectionsMap() {
-        return connections;
-    }
 
     public int getConnectionOfPerson(String person) {
         return connections.getOrDefault(person, 0);
@@ -72,13 +65,6 @@ public class Player {
         }
     }
 
-    /**
-     *
-     * @return the set of correct guesses
-     */
-    public Set<Movie> getCorrectGuesses() {
-        return correctGuesses;
-    }
 
     /**
      * adds a correct guess to the set
@@ -87,19 +73,6 @@ public class Player {
         this.correctGuesses.add(guess);
 
     }
-
-    /**
-     *
-     * @return the set of incorrect guesses
-     */
-    public Set<Movie> getIncorrectGuesses() {
-        return incorrectGuesses;
-    }
-
-    public boolean isPlayer(String name) {
-        return username.equals(name);
-    }
-
 
     /**
      * adds an incorrect guess to set

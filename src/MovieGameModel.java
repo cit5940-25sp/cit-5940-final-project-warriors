@@ -6,28 +6,32 @@ import java.util.*;
  * This model follows the Observer pattern and interacts with Movie and Player objects.
  */
 public class MovieGameModel implements IObservable {
+    // player fields
     private String player1Name = "";
     private String player2Name = "";
     private boolean enteringPlayer1 = true;
-    private boolean gameOver = false;
-
     private Player player1 = new Player();
     private Player player2 = new Player();
     private Player currentPlayer;
+
+    // movie data fields
     private Deque<Movie> lastFiveMovies = new ArrayDeque<>(5);
     private Map<String, Set<String>> lastFiveConnections = new HashMap<>(5);
     private Map<String, Player> lastFivePlayers = new HashMap<>(5);
     private Set<Movie> allMovies = new HashSet<>();
+
+    // observer fields
     private List<IObserver> observers = new ArrayList<>();
     private boolean hasChanged = false;
 
+    // autocomplete fields
     private List<String> suggestions = new ArrayList<>();
     private int suggestionIndex = 0;
     private List<String> suggestionGenres = new ArrayList<>();
     ArrayList<String> dictionary;
 
+    // gameplay fields
     private int secondsRemaining = 30;
-
     private boolean gameStarted = false;
     private int roundNumber = 0;
     private String selectedGenre = "";
@@ -39,8 +43,7 @@ public class MovieGameModel implements IObservable {
             "Horror", "Romance", "Sci-Fi", "Thriller"
     };
 
-
-    // Power-up system
+    // power-up fields
     private int player1TimeBoosts = 2;
     private int player2TimeBoosts = 2;
     private int player1TimeSabotages = 1;
@@ -71,26 +74,7 @@ public class MovieGameModel implements IObservable {
         }
     }
 
-    /**
-     * @return Map of movie titles to the player who submitted them.
-     */
-    public Map<String, Player> getLastFivePlayers() {
-        return this.lastFivePlayers;
-    }
-
-    /**
-     * @return true if it's Player 1's turn.
-     */
-    public boolean isPlayer1Turn() {
-        return (roundNumber % 2 == 0);
-    }
-
-    /**
-     * @return true if currently entering Player 1's name.
-     */
-    public boolean getEnteringPlayer1() {
-        return this.enteringPlayer1;
-    }
+    // Getters and setters
 
     /**
      * @return the name entered for Player 1.
@@ -107,11 +91,225 @@ public class MovieGameModel implements IObservable {
     }
 
     /**
+     * @return true if currently entering Player 1's name.
+     */
+    public boolean getEnteringPlayer1() {
+        return this.enteringPlayer1;
+    }
+
+    /**
      * Sets whether the current name being entered is for Player 1.
      * @param bool true if entering name for Player 1.
      */
     public void setEnteringPlayer1(boolean bool) {
         this.enteringPlayer1 = bool;
+    }
+
+    /**
+     * @return a queue of the movies that have been played in order.
+     */
+    public Deque<Movie> getLastFiveMovies() {
+        return this.lastFiveMovies;
+    }
+
+    /**
+     * @return a queue of the movies that have been played in order.
+     */
+    public Map<String, Set<String>> getLastFiveConnections() {
+        return this.lastFiveConnections;
+    }
+
+    /**
+     * @return Map of movie titles to the player who submitted them.
+     */
+    public Map<String, Player> getLastFivePlayers() {
+        return this.lastFivePlayers;
+    }
+
+    /**
+     * @return the currently selected genre.
+     */
+    public String getSelectedGenre() {
+        return selectedGenre;
+    }
+
+    /**
+     * @return the index of the currently selected genre in the genre list.
+     */
+    public int getSelectedGenreIndex() {
+        return selectedGenreIndex;
+    }
+
+    /**
+     * @return true if the game is in the genre selection phase.
+     */
+    public boolean isSelectingGenre() {
+        return selectingGenre;
+    }
+
+    /**
+     * Sets whether the game is currently in the genre selection phase.
+     *
+     * @param selectingGenre true to indicate genre selection is in progress.
+     */
+    public void setSelectingGenre(boolean selectingGenre) {
+        this.selectingGenre = selectingGenre;
+    }
+
+    /**
+     * @return the full list of available genres.
+     */
+    public String[] getGenreList() {
+        return genreList;
+    }
+
+    /**
+     * Sets whether the game has started.
+     * @param gameStarted true to indicate game start.
+     */
+    public void setGameStarted(boolean gameStarted) {
+        this.gameStarted = gameStarted;
+    }
+
+    /**
+     * @return the current round number.
+     */
+    public int getRoundNumber() {
+        return roundNumber;
+    }
+
+    /**
+     * @return Player 1's current score.
+     */
+    public int getPlayer1Score() {
+        return player1.getScore();
+    }
+
+    /**
+     * @return Player 2's current score.
+     */
+    public int getPlayer2Score() {
+        return player2.getScore();
+    }
+
+    /**
+     * @return Remaining time boosts for Player 1.
+     */
+    public int getPlayer1TimeBoosts() {
+        return player1TimeBoosts;
+    }
+
+    /**
+     * @return Remaining time boosts for Player 2.
+     */
+    public int getPlayer2TimeBoosts() {
+        return player2TimeBoosts;
+    }
+
+    /**
+     * @return Remaining time sabotages for Player 1.
+     */
+    public int getPlayer1TimeSabotages() {
+        return player1TimeSabotages;
+    }
+
+    /**
+     * Sets Player 1's time sabotages.
+     * @param player1TimeSabotages number of sabotages left.
+     */
+    public void setPlayer1TimeSabotages(int player1TimeSabotages) {
+        this.player1TimeSabotages = player1TimeSabotages;
+    }
+
+    /**
+     * @return Remaining time sabotages for Player 2.
+     */
+    public int getPlayer2TimeSabotages() {
+        return player2TimeSabotages;
+    }
+
+    /**
+     * Sets Player 2's time sabotages.
+     * @param player2TimeSabotages number of sabotages left.
+     */
+    public void setPlayer2TimeSabotages(int player2TimeSabotages) {
+        this.player2TimeSabotages = player2TimeSabotages;
+    }
+
+    public boolean isNextPlayerSabotaged() {
+        return nextPlayerSabotaged;
+    }
+
+    /**
+     * Applies sabotage effect to the next player by reducing their available time.
+     * @param nextPlayerSabotaged true if next player is sabotaged.
+     */
+    public void setNextPlayerSabotaged(boolean nextPlayerSabotaged) {
+        this.nextPlayerSabotaged = nextPlayerSabotaged;
+    }
+
+    /**
+     * @return List of current autocomplete suggestions.
+     */
+    public List<String> getSuggestions() {
+        return suggestions;
+    }
+
+    /**
+     * @return The current suggestion index.
+     */
+    public int getSuggestionIndex() {
+        return suggestionIndex;
+    }
+
+    /**
+     * Sets the current suggestion index.
+     * @param suggestionIndex The index to set.
+     */
+    public void setSuggestionIndex(int suggestionIndex) {
+        this.suggestionIndex = suggestionIndex;
+    }
+
+    /**
+     * @return Remaining time in seconds for current round.
+     */
+    public int getSecondsRemaining() {
+        return secondsRemaining;
+    }
+
+    /**
+     * @return true if the game has officially started.
+     */
+    public boolean isGameStarted() {
+        return gameStarted;
+    }
+
+
+    // other methods
+
+    /**
+     * Updates the selected genre index by a delta value, cycling through available genres.
+     *
+     * @param delta       the amount to change the index by.
+     * @param genresCount the total number of genres in the list.
+     */
+    public void selectNextGenre(int delta, int genresCount) {
+        selectedGenreIndex = (selectedGenreIndex + delta + genresCount) % genresCount;
+        selectedGenre = genreList[selectedGenreIndex];
+    }
+
+    /**
+     * @return the most recently added movie.
+     */
+    private Movie getMostRecentMovie() {
+        return getLastFiveMovies().peekLast();
+    }
+
+    /**
+     * @return true if it's Player 1's turn.
+     */
+    public boolean isPlayer1Turn() {
+        return (roundNumber % 2 == 0);
     }
 
     /**
@@ -137,10 +335,11 @@ public class MovieGameModel implements IObservable {
         }
     }
 
+
     /**
      * Assigns the finalized names to each player.
      */
-    public void initializePlayerNames() {
+    private void initializePlayerNames() {
         player1.setUsername(player1Name);
         player2.setUsername(player2Name);
     }
@@ -203,27 +402,6 @@ public class MovieGameModel implements IObservable {
             }
         }
         suggestionIndex = 0;
-    }
-
-    /**
-     * @return a queue of the movies that have been played in order.
-     */
-    public Deque<Movie> getLastFiveMovies() {
-        return this.lastFiveMovies;
-    }
-
-    /**
-     * @return a queue of the movies that have been played in order.
-     */
-    public Map<String, Set<String>> getLastFiveConnections() {
-        return this.lastFiveConnections;
-    }
-
-    /**
-     * @return the most recently added movie.
-     */
-    private Movie getMostRecentMovie() {
-        return getLastFiveMovies().peekLast();
     }
 
     /**
@@ -320,6 +498,91 @@ public class MovieGameModel implements IObservable {
     }
 
     /**
+     * Prepares the game state for the next round and adjusts timers accordingly.
+     */
+    public void updateToNextRound() {
+        System.out.println("Next player sabotaged: " + nextPlayerSabotaged);
+
+        secondsRemaining = nextPlayerSabotaged ? 20 : 30;
+        nextPlayerSabotaged = false;
+
+        System.out.println("Seconds remaining after sabotage: " + secondsRemaining);
+
+        roundNumber++;
+        suggestions.clear();
+        suggestionGenres.clear();
+    }
+
+    /**
+     * Decrements the timer by one second.
+     */
+    public void decrementSecondsRemaining() {
+        this.secondsRemaining--;
+    }
+
+    /**
+     * Adds 15 seconds to the current player's timer and reduces their remaining time boosts by one.
+     */
+    public void updateTimeBoosts() {
+        secondsRemaining += 15;
+        if (isPlayer1Turn()) {
+            player1TimeBoosts--;
+        } else {
+            player2TimeBoosts--;
+        }
+    }
+
+    /**
+     * Starts a new game session by initializing player names and notifying observers of the game start event.
+     */
+    public void startNewGame() {
+        setGameStarted(true);
+        initializePlayerNames();
+        setChanged();
+        notifyObservers("GAME_START");
+        selectedGenre = genreList[selectedGenreIndex];
+        selectingGenre = false;
+    }
+
+    /**
+     * Resets the game model to its initial state using a given starting movie.
+     *
+     * @param startingMovie the movie to initialize the game with.
+     */
+    public void resetModel(Movie startingMovie) {
+        lastFiveConnections.clear();
+        lastFivePlayers.clear();
+        lastFiveMovies.clear();
+        suggestions.clear();
+        suggestionGenres.clear();
+        allMovies.clear();
+
+
+        roundNumber = 0;
+        secondsRemaining = 30;
+        gameStarted = false;
+        enteringPlayer1 = true;
+        player1Name = "";
+        player2Name = "";
+
+        player1TimeBoosts = 2;
+        player2TimeBoosts = 2;
+        player1TimeSabotages = 1;
+        player2TimeSabotages = 1;
+
+        player1.reset();
+        player2.reset();
+        currentPlayer = player1;
+
+        lastFiveMovies.add(startingMovie);
+        lastFiveConnections.put(startingMovie.getTitle(), null);
+        lastFivePlayers.put(startingMovie.getTitle(), null);
+        allMovies.add(startingMovie);
+    }
+
+    // Observer methods
+
+    /**
      * Adds a new observer.
      */
     @Override
@@ -383,258 +646,5 @@ public class MovieGameModel implements IObservable {
         }
     }
 
-    /**
-     * @return List of current autocomplete suggestions.
-     */
-    public List<String> getSuggestions() {
-        return suggestions;
-    }
 
-    /**
-     * @return The current suggestion index.
-     */
-    public int getSuggestionIndex() {
-        return suggestionIndex;
-    }
-
-    /**
-     * Sets the current suggestion index.
-     * @param suggestionIndex The index to set.
-     */
-    public void setSuggestionIndex(int suggestionIndex) {
-        this.suggestionIndex = suggestionIndex;
-    }
-
-    /**
-     * @return Remaining time in seconds for current round.
-     */
-    public int getSecondsRemaining() {
-        return secondsRemaining;
-    }
-
-    /**
-     * Decrements the timer by one second.
-     */
-    public void decrementSecondsRemaining() {
-        this.secondsRemaining--;
-    }
-
-    /**
-     * @return true if the game has officially started.
-     */
-    public boolean isGameStarted() {
-        return gameStarted;
-    }
-
-    /**
-     * Sets whether the game has started.
-     * @param gameStarted true to indicate game start.
-     */
-    public void setGameStarted(boolean gameStarted) {
-        this.gameStarted = gameStarted;
-    }
-
-    /**
-     * @return the current round number.
-     */
-    public int getRoundNumber() {
-        return roundNumber;
-    }
-
-    /**
-     * @return Player 1's current score.
-     */
-    public int getPlayer1Score() {
-        return player1.getScore();
-    }
-
-    /**
-     * @return Player 2's current score.
-     */
-    public int getPlayer2Score() {
-        return player2.getScore();
-    }
-
-    /**
-     * @return Remaining time boosts for Player 1.
-     */
-    public int getPlayer1TimeBoosts() {
-        return player1TimeBoosts;
-    }
-
-    /**
-     * @return Remaining time boosts for Player 2.
-     */
-    public int getPlayer2TimeBoosts() {
-        return player2TimeBoosts;
-    }
-
-    /**
-     * @return Remaining time sabotages for Player 1.
-     */
-    public int getPlayer1TimeSabotages() {
-        return player1TimeSabotages;
-    }
-
-    /**
-     * Sets Player 1's time sabotages.
-     * @param player1TimeSabotages number of sabotages left.
-     */
-    public void setPlayer1TimeSabotages(int player1TimeSabotages) {
-        this.player1TimeSabotages = player1TimeSabotages;
-    }
-
-    /**
-     * @return Remaining time sabotages for Player 2.
-     */
-    public int getPlayer2TimeSabotages() {
-        return player2TimeSabotages;
-    }
-
-    /**
-     * Sets Player 2's time sabotages.
-     * @param player2TimeSabotages number of sabotages left.
-     */
-    public void setPlayer2TimeSabotages(int player2TimeSabotages) {
-        this.player2TimeSabotages = player2TimeSabotages;
-    }
-
-    /**
-     * Applies sabotage effect to the next player by reducing their available time.
-     * @param nextPlayerSabotaged true if next player is sabotaged.
-     */
-    public void setNextPlayerSabotaged(boolean nextPlayerSabotaged) {
-        this.nextPlayerSabotaged = nextPlayerSabotaged;
-    }
-
-    /**
-     * Prepares the game state for the next round and adjusts timers accordingly.
-     */
-    public void updateToNextRound() {
-        System.out.println("Next player sabotaged: " + nextPlayerSabotaged);
-
-        secondsRemaining = nextPlayerSabotaged ? 20 : 30;
-        nextPlayerSabotaged = false;
-
-        System.out.println("Seconds remaining after sabotage: " + secondsRemaining);
-
-        roundNumber++;
-        suggestions.clear();
-        suggestionGenres.clear();
-    }
-
-    /**
-     * Adds 15 seconds to the current player's timer and reduces their remaining time boosts by one.
-     */
-    public void updateTimeBoosts() {
-        secondsRemaining += 15;
-        if (isPlayer1Turn()) {
-            player1TimeBoosts--;
-        } else {
-            player2TimeBoosts--;
-        }
-    }
-
-    /**
-     * Starts a new game session by initializing player names and notifying observers of the game start event.
-     */
-    public void startNewGame() {
-        setGameStarted(true);
-        initializePlayerNames();
-        setChanged();
-        notifyObservers("GAME_START");
-        selectedGenre = genreList[selectedGenreIndex];
-        selectingGenre = false;
-    }
-
-    /**
-     * Resets the game model to its initial state using a given starting movie.
-     *
-     * @param startingMovie the movie to initialize the game with.
-     */
-    public void resetModel(Movie startingMovie) {
-        lastFiveConnections.clear();
-        lastFivePlayers.clear();
-        lastFiveMovies.clear();
-        suggestions.clear();
-        suggestionGenres.clear();
-        allMovies.clear();
-
-
-        roundNumber = 0;
-        secondsRemaining = 30;
-        gameStarted = false;
-        enteringPlayer1 = true;
-        player1Name = "";
-        player2Name = "";
-
-        player1TimeBoosts = 2;
-        player2TimeBoosts = 2;
-        player1TimeSabotages = 1;
-        player2TimeSabotages = 1;
-
-        player1.reset();
-        player2.reset();
-        currentPlayer = player1;
-
-        lastFiveMovies.add(startingMovie);
-        lastFiveConnections.put(startingMovie.getTitle(), null);
-        lastFivePlayers.put(startingMovie.getTitle(), null);
-        allMovies.add(startingMovie);
-    }
-
-    /**
-     * @return the currently selected genre.
-     */
-    public String getSelectedGenre() {
-        return selectedGenre;
-    }
-
-    /**
-     * @return the index of the currently selected genre in the genre list.
-     */
-    public int getSelectedGenreIndex() {
-        return selectedGenreIndex;
-    }
-
-    /**
-     * Updates the selected genre index by a delta value, cycling through available genres.
-     *
-     * @param delta       the amount to change the index by.
-     * @param genresCount the total number of genres in the list.
-     */
-    public void selectNextGenre(int delta, int genresCount) {
-        selectedGenreIndex = (selectedGenreIndex + delta + genresCount) % genresCount;
-        selectedGenre = genreList[selectedGenreIndex];
-    }
-
-    /**
-     * @return true if the game is in the genre selection phase.
-     */
-    public boolean isSelectingGenre() {
-        return selectingGenre;
-    }
-
-    /**
-     * Sets whether the game is currently in the genre selection phase.
-     *
-     * @param selectingGenre true to indicate genre selection is in progress.
-     */
-    public void setSelectingGenre(boolean selectingGenre) {
-        this.selectingGenre = selectingGenre;
-    }
-
-    /**
-     * @return the full list of available genres.
-     */
-    public String[] getGenreList() {
-        return genreList;
-    }
-
-    /**
-     * @return true if the game has ended.
-     */
-    public boolean getGameOver() {
-        return gameOver;
-    }
 }
