@@ -88,6 +88,9 @@ public class Player {
         return score;
     }
 
+    public Map<String, Integer> getConnections() {
+        return connections;
+    }
     /**
      * sets the score field
      */
