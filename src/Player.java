@@ -7,7 +7,7 @@ import java.util.Set;
  * Represents a player and their stats for the Movie Game.
  */
 public class Player {
-    private String username;
+    private String username = "";
     private int score = 0;
     private Map<String, Integer> connections = new HashMap<>();;
     private Set<Movie> correctGuesses = new HashSet<>();;
@@ -110,6 +110,7 @@ public class Player {
      */
     public void reset() {
         score = 0;
+        username = "";
         correctGuesses.clear();
         incorrectGuesses.clear();
         connections.clear();
