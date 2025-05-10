@@ -37,16 +37,18 @@ public class MovieGameController implements IObserver{
         // schedule timer
         scheduler = Executors.newScheduledThreadPool(1);
         scheduler.scheduleAtFixedRate(() -> {
-            if (timerRunning && model.getSecondsRemaining() > 0 && model.isGameStarted()) {
-                model.decrementSecondsRemaining();
-                try {
-                    view.updateScreen(this.currentInput);
-                } catch (IOException e) {
-                    e.printStackTrace();
+            synchronized (this) {
+                if (timerRunning && model.getSecondsRemaining() > 0 && model.isGameStarted()) {
+                    model.decrementSecondsRemaining();
+                    try {
+                        view.updateScreen(this.currentInput);
+                    } catch (IOException e) {
+                        e.printStackTrace();
+                    }
+                } else if (model.getSecondsRemaining() == 0 && model.isGameStarted()) {
+                    model.setChanged();
+                    model.notifyObservers("GAME_OVER_" + (model.isPlayer1Turn() ? "2" : "1"));
                 }
-            } else if (model.getSecondsRemaining() == 0 && model.isGameStarted()) {
-                model.setChanged();
-                model.notifyObservers("GAME_OVER_" + (model.isPlayer1Turn() ? "2" : "1"));
             }
         }, 1, 1, TimeUnit.SECONDS);
     }
@@ -191,8 +193,9 @@ public class MovieGameController implements IObserver{
      * Handles backspace input to remove a character and update suggestions accordingly.
      */
     private void handleBackspace() {
-        if (view.getCursorPosition() > 0) {
-            currentInput.deleteCharAt(view.getCursorPosition() - 1);
+        int cursor = view.getCursorPosition();
+        if (cursor > 0 && cursor <= currentInput.length()) {
+            currentInput.deleteCharAt(cursor - 1);
             view.decrementCursorPosition();
             model.updateSuggestions(this.currentInput);
         }
@@ -229,6 +232,9 @@ public class MovieGameController implements IObserver{
      */
     private void gameOver() throws IOException {
         timerRunning = false;
+        if (!scheduler.isShutdown()) {
+            scheduler.shutdown(); // clean up timer
+        }
         boolean waitingForInput = true;
         while (waitingForInput) {
             KeyStroke keyStroke = view.screenPollInput();
