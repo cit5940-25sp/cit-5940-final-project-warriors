@@ -78,7 +78,7 @@ public class Database {
                     try {
                         releaseYear = Integer.parseInt(releaseDate.substring(0, 4));
                     } catch (NumberFormatException | IndexOutOfBoundsException e) {
-                        System.err.println("Failed to extract year for " + title + ": " + e.getMessage());
+                        // No error
                     }
                 }
 
@@ -204,7 +204,7 @@ public class Database {
         int randomIndex = new Random().nextInt(keySet.size());
         String randomKey = (String) keySet.toArray()[randomIndex];
         return movieMap.get(randomKey);
-        //return movieMap.get("Titanic (1997)");
+//        return movieMap.get("Titanic (1997)");
     }
 
     /**

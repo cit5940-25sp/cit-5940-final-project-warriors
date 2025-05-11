@@ -1,12 +1,6 @@
-import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
-
-import java.io.ByteArrayOutputStream;
-import java.io.PrintStream;
-import java.text.SimpleDateFormat;
-import java.util.Date;
 import java.util.Set;
-
 import static org.junit.Assert.assertTrue;
 import static org.junit.jupiter.api.Assertions.*;
 
@@ -19,7 +13,7 @@ public class DatabaseTest {
 
         Movie Tangled = database.getMovieByName("Tangled (2010)");
         Set<String> actor = Tangled.getActors();
-        assertTrue(actor.contains("Brad Garrett"));
+        Assertions.assertTrue(actor.contains("Brad Garrett"));
         assertTrue(actor.contains("Byron Howard"));
         assertTrue(actor.contains("Delaney Rose Stein"));
         assertTrue(actor.contains("Zachary Levi"));
