@@ -134,6 +134,9 @@ public class Database {
 
     /**
      * Helper method to parse people data.
+     *
+     * @param peopleData - Name of people
+     * @return - List of people
      */
     private List<String> parsePeopleData(String peopleData) {
         List<String> entries = new ArrayList<>();
@@ -156,6 +159,9 @@ public class Database {
 
     /**
      * Helper method to parse genre data.
+     *
+     * @param genreData - Name of genre
+     * @return - Set of genre
      */
     private Set<String> parseGenres(String genreData) {
         Set<String> genres = new HashSet<>();
@@ -181,6 +187,7 @@ public class Database {
 
     /**
      * Return all people in the movie using movie title
+     *
      * @param title - String name of movie
      * @return allPeople
      */
@@ -197,6 +204,7 @@ public class Database {
 
     /**
      * Generate a random movie to start the game with
+     *
      * @return Movie
      */
     public Movie getRandomMovie() {
@@ -209,6 +217,7 @@ public class Database {
 
     /**
      * Get the set of all movie names. Used for implementing Autocomplete.
+     *
      * @return set of all movie names
      */
     public Set<String> getMovieNameSet() {
@@ -217,6 +226,7 @@ public class Database {
 
     /**
      * Get the Movie class object by its unique name
+     *
      * @param name - String name of movie
      * @return Movie class object
      */

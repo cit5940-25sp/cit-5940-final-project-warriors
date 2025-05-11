@@ -11,15 +11,15 @@ import java.util.concurrent.TimeUnit;
  * Implements the IObserver interface to respond to events.
  */
 public class MovieGameController implements IObserver{
-    private MovieGameModel model;
-    private MovieGameView view;
-    private Database database = new Database();
+    protected MovieGameModel model;
+    protected MovieGameView view;
+    protected Database database = new Database();
 
-    private StringBuilder currentInput = new StringBuilder();
-    private boolean timerRunning = true;
-    private ScheduledExecutorService scheduler;
+    protected StringBuilder currentInput = new StringBuilder();
+    protected boolean timerRunning = true;
+    protected ScheduledExecutorService scheduler;
     private String selectedTitle = "";
-    private boolean shouldExit = false;
+    protected boolean shouldExit = false;
 
     /**
      * Constructs a new MovieGameController, initializes the database, model, and view,
@@ -124,7 +124,7 @@ public class MovieGameController implements IObserver{
      *
      * @throws IOException If there is an error cleaning up the view.
      */
-    private void cleanup() throws IOException {
+    protected void cleanup() throws IOException {
         if (scheduler != null && !scheduler.isShutdown()) {
             scheduler.shutdown();
         }
@@ -137,7 +137,7 @@ public class MovieGameController implements IObserver{
      * @param keyStroke The input key pressed by the user.
      * @throws IOException If there is an error updating the view.
      */
-    private void handleLandingInput(KeyStroke keyStroke) throws IOException {
+    protected void handleLandingInput(KeyStroke keyStroke) throws IOException {
         if (!model.isSelectingGenre()) {
             // player name entry phase
             if (keyStroke.getKeyType() == KeyType.Character) {
@@ -177,7 +177,7 @@ public class MovieGameController implements IObserver{
      * @param c The character typed by the player.
      * @throws IOException If there is an error updating the screen.
      */
-    private void handleCharacter(char c) throws IOException {
+    protected void handleCharacter(char c) throws IOException {
         if (c == '[') {
             activateTimeBoost();
         } else if (c == ']') {
@@ -192,7 +192,7 @@ public class MovieGameController implements IObserver{
     /**
      * Handles backspace input to remove a character and update suggestions accordingly.
      */
-    private void handleBackspace() {
+    protected void handleBackspace() {
         int cursor = view.getCursorPosition();
         if (cursor > 0 && cursor <= currentInput.length()) {
             currentInput.deleteCharAt(cursor - 1);
@@ -206,7 +206,7 @@ public class MovieGameController implements IObserver{
      *
      * @throws IOException If there is an error updating the view.
      */
-    private void handleEnter() throws IOException {
+    protected void handleEnter() throws IOException {
         // if no suggestions, do nothing
         if (model.getSuggestions().isEmpty()) {
             return;
@@ -230,7 +230,7 @@ public class MovieGameController implements IObserver{
      *
      * @throws IOException if screen updates fail.
      */
-    private void gameOver() throws IOException {
+    protected void gameOver() throws IOException {
         timerRunning = false;
         if (!scheduler.isShutdown()) {
             scheduler.shutdown(); // clean up timer
@@ -263,7 +263,7 @@ public class MovieGameController implements IObserver{
      *
      * @throws IOException if resetting view fails.
      */
-    private void restartGame() throws IOException {
+    protected void restartGame() throws IOException {
         model.resetModel(database.getRandomMovie());
         view.resetView();
         currentInput = new StringBuilder();
@@ -275,7 +275,7 @@ public class MovieGameController implements IObserver{
      *
      * @throws IOException if the view fails to display the exit screen.
      */
-    private void exitGame() throws IOException {
+    protected void exitGame() throws IOException {
         view.showExitScreen();
         shouldExit = true;
     }
@@ -285,7 +285,7 @@ public class MovieGameController implements IObserver{
      *
      * @throws IOException if view fails to display the power-up or update.
      */
-    private void activateTimeBoost() throws IOException {
+    protected void activateTimeBoost() throws IOException {
         if ((model.isPlayer1Turn() && model.getPlayer1TimeBoosts() > 0) ||
                 (!model.isPlayer1Turn() && model.getPlayer2TimeBoosts() > 0)) {
 
@@ -303,7 +303,7 @@ public class MovieGameController implements IObserver{
      *
      * @throws IOException if view fails to display the power-up or update.
      */
-    private void activateTimeSabotage() throws IOException {
+    protected void activateTimeSabotage() throws IOException {
         boolean isPlayer1Turn = (model.isPlayer1Turn());
 
         if ((isPlayer1Turn && model.getPlayer1TimeSabotages() > 0) ||
